@@ -7,6 +7,15 @@ The court scheduling algorithm aims to optimize groups of players on the availab
 2. DIVERSITY: Players who have played together less should be paired together with higher priority
 3. SKILL: Players should be matched with approximate balance between the two sides
 
+The algorithm assigns courts with the following logic:
+1. Order all players by their TIME priority. This is the 'queue'.
+2. Perform a greedy algorithm to select the players to add to the next court (players are moved to the end of the queue once they are selected):
+    1. Assign the first player in the queue to team 1
+    2. Pick a player to join team 2: check the next 'x' players in the queue and pick the one with the highest combined TIME and DIVERSITY score with the selected team 1 player
+    3. Pick team 1's partner: check the next 'x' players in the queue and pick the one with the highest combined TIME and average DIVERSITY score with the other 2 selected players
+    4. Pick team 2's partner: check the next 'x' players in the queue and pick the one with the highest combined TIME and average DIVERSITY score with the other 3 players, such that the total SKILL scores of both teams match the target difference.
+3. Repeat step 2. as many times as needed to fill the "upcoming games" display.
+
 ### Time Heuristic
 The app should track the time each active player finished their last game. Players who have waited longer will be ranked higher in the queue.
 
