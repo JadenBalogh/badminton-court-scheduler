@@ -1,7 +1,34 @@
+'use client'
+
 import Image from "next/image";
 import Court from "./court";
+import React, { useState, useEffect, MouseEventHandler } from 'react';
 
 export default function Home() {
+  let [activePlayers, setActivePlayers] = useState<string[]>([]);
+
+  useEffect(() => {
+    console.log("reloaded!");
+    loadData();
+
+    async function loadData() {
+      console.log("loading data!");
+      let data = await fetch('./test-data.txt');
+      let text = await data.text();
+
+      setActivePlayers([]);
+
+      let lines = text.split(/[\r\n]+/)
+      for (let line of lines) {
+        setActivePlayers(a => [...a, line])
+      }
+    }
+  }, []);
+
+  function handleClick() {
+    console.log(activePlayers);
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
@@ -9,6 +36,10 @@ export default function Home() {
           This is the test page for Badminton Court Scheduler.
         </p>
       </div>
+
+      <button onClick={() => handleClick()}>
+        Print the active players list!
+      </button>
 
       <div className="relative flex w-full justify-center gap-x-32">
         <Court />
