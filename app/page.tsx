@@ -8,11 +8,9 @@ export default function Home() {
   let [activePlayers, setActivePlayers] = useState<string[]>([]);
 
   useEffect(() => {
-    console.log("reloaded!");
     loadData();
 
     async function loadData() {
-      console.log("loading data!");
       let data = await fetch('./test-data.txt');
       let text = await data.text();
 
