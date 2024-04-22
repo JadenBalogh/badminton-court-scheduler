@@ -40,9 +40,9 @@ export default function Home() {
       </button>
 
       <div className="relative flex w-full justify-center gap-x-32">
-        <Court />
-        <Court />
-        <Court />
+        <Court players={["Test1"]} />
+        <Court players={["Test1", "Test2", "Test3"]} />
+        <Court players={["Test1", "Test2", "Test3", "Test4"]} />
       </div>
 
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">

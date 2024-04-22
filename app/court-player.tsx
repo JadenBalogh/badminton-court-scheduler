@@ -1,6 +1,10 @@
 import Image from "next/image";
 
-export default function CourtPlayer() {
+type CourtPlayerProps = {
+  name: string;
+}
+
+export default function CourtPlayer({ name }: CourtPlayerProps) {
   return (
     <div className="flex flex-col max-w-20 w-full items-center justify-between">
       <Image
@@ -10,9 +14,9 @@ export default function CourtPlayer() {
         height={60}
         priority
       />
-      <div className="text-left w-full">
+      <div className="text-center w-full">
         <p className="truncate">
-          {"Player Name Test"}
+          {name}
         </p>
       </div>
       <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold px-3 rounded">
