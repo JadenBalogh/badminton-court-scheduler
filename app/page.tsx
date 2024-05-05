@@ -1,16 +1,13 @@
 'use client'
 
-import Court from "./court";
+import { Player, Court } from '../types/types'
+import CourtDisplay from "./court";
 import React, { useState, useEffect } from 'react';
 
-type Player = {
-  id: number;
-  name: string;
-  skillLevel: number;
-}
-
 export default function Home() {
+  const COURT_COUNT = 3; // TODO: Replace with admin settings
   let [activePlayers, setActivePlayers] = useState<Player[]>([]);
+  let [activeCourts, setActiveCourts] = useState<Court[]>([]);
 
   useEffect(() => {
     loadData();
@@ -36,11 +33,30 @@ export default function Home() {
 
         playerID++;
       }
+
+      setActiveCourts([]);
+
+      for (let i = 0; i < COURT_COUNT; i++) {
+        let court: Court = {
+          id: i,
+          players: []
+        };
+
+        setActiveCourts(a => [...a, court])
+      }
     }
   }, []);
 
   function handleClick() {
     console.log(activePlayers);
+  }
+
+  function renderActiveCourts() {
+    let result = [];
+    for (let activeCourt of activeCourts) {
+      result.push(<CourtDisplay key={activeCourt.id} court={activeCourt} />)
+    }
+    return result;
   }
 
   return (
@@ -56,9 +72,7 @@ export default function Home() {
       </button>
 
       <div className="relative flex w-full justify-center gap-x-32">
-        <Court players={["Test1"]} />
-        <Court players={["Test1", "Test2", "Test3"]} />
-        <Court players={["Test1", "Test2", "Test3", "Test4"]} />
+        {renderActiveCourts()}
       </div>
 
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">

@@ -1,15 +1,12 @@
+import { Court } from '../types/types';
 import Image from "next/image";
 import CourtPlayer from "./court-player";
 
 type CourtProps = {
-  players: string[];
+  court: Court;
 }
 
-export default function Court({ players }: CourtProps) {
-  function getPlayer(index: number) {
-    return players[index] ?? "(empty)";
-  }
-
+export default function CourtDisplay({ court }: CourtProps) {
   return (
     <div className="relative text-center">
       <Image
@@ -22,12 +19,12 @@ export default function Court({ players }: CourtProps) {
       <div className="w-full absolute top-0 left-0 text-center py-6">
         <div className="flex flex-col h-80 items-center justify-between">
           <div className="flex w-full items-center justify-evenly">
-            <CourtPlayer name={getPlayer(0)} />
-            <CourtPlayer name={getPlayer(1)} />
+            <CourtPlayer player={court.players[0]} />
+            <CourtPlayer player={court.players[1]} />
           </div>
           <div className="flex w-full items-center justify-evenly">
-            <CourtPlayer name={getPlayer(2)} />
-            <CourtPlayer name={getPlayer(3)} />
+            <CourtPlayer player={court.players[2]} />
+            <CourtPlayer player={court.players[3]} />
           </div>
         </div>
       </div>
