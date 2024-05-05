@@ -1,11 +1,16 @@
 'use client'
 
-import Image from "next/image";
 import Court from "./court";
-import React, { useState, useEffect, MouseEventHandler } from 'react';
+import React, { useState, useEffect } from 'react';
+
+type Player = {
+  id: number;
+  name: string;
+  skillLevel: number;
+}
 
 export default function Home() {
-  let [activePlayers, setActivePlayers] = useState<string[]>([]);
+  let [activePlayers, setActivePlayers] = useState<Player[]>([]);
 
   useEffect(() => {
     loadData();
@@ -16,9 +21,20 @@ export default function Home() {
 
       setActivePlayers([]);
 
+      let playerID = 0;
       let lines = text.split(/[\r\n]+/)
+
       for (let line of lines) {
-        setActivePlayers(a => [...a, line])
+        let fields = line.split(',');
+        let player: Player = {
+          id: playerID,
+          name: fields[0],
+          skillLevel: Number(fields[1])
+        };
+
+        setActivePlayers(a => [...a, player])
+
+        playerID++;
       }
     }
   }, []);

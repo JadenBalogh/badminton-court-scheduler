@@ -1,4 +1,4 @@
-Jaden
-Chensheng
-Kelly
-Jenny
+Jaden, 2
+Chensheng, 1
+Kelly, 2
+Jenny, 3
