@@ -1,7 +1,7 @@
 'use client'
 
 import { Player, Court } from '../types/types'
-import CourtDisplay from "./court";
+import ActiveCourts from './active-courts';
 import React, { useState, useEffect } from 'react';
 
 export default function Home() {
@@ -19,7 +19,7 @@ export default function Home() {
       setActivePlayers([]);
 
       let playerID = 0;
-      let lines = text.split(/[\r\n]+/)
+      let lines = text.split(/[\r\n]+/);
 
       for (let line of lines) {
         let fields = line.split(',');
@@ -29,7 +29,7 @@ export default function Home() {
           skillLevel: Number(fields[1])
         };
 
-        setActivePlayers(a => [...a, player])
+        setActivePlayers(a => [...a, player]);
 
         playerID++;
       }
@@ -42,21 +42,44 @@ export default function Home() {
           players: []
         };
 
-        setActiveCourts(a => [...a, court])
+        setActiveCourts(a => [...a, court]);
       }
     }
   }, []);
 
-  function handleClick() {
-    console.log(activePlayers);
+  function fillActiveCourts() {
+    let newActiveCourts: Court[] = [];
+
+    for (let i = 0; i < 4 * COURT_COUNT; i++) {
+      let courtIdx = Math.floor(i / 4);
+      let courtPlayerIdx = i % 4;
+
+      if (courtIdx >= activeCourts.length) {
+        break;
+      }
+
+      if (!newActiveCourts[courtIdx]) {
+        newActiveCourts.push({
+          id: courtIdx,
+          players: []
+        })
+      }
+
+      if (i < activePlayers.length) {
+        newActiveCourts[courtIdx].players[courtPlayerIdx] = activePlayers[i];
+        console.log(`Setting [Court ${courtIdx}, Player ${courtPlayerIdx}] = ${activePlayers[i].name}`);
+      }
+    }
+
+    setActiveCourts(newActiveCourts);
+    console.log("Filled active courts.");
   }
 
-  function renderActiveCourts() {
-    let result = [];
-    for (let activeCourt of activeCourts) {
-      result.push(<CourtDisplay key={activeCourt.id} court={activeCourt} />)
-    }
-    return result;
+  function printState() {
+    console.log("Players:");
+    console.log(activePlayers);
+    console.log("Courts:");
+    console.log(activeCourts);
   }
 
   return (
@@ -67,13 +90,17 @@ export default function Home() {
         </p>
       </div>
 
-      <button onClick={() => handleClick()}>
-        Print the active players list!
-      </button>
+      <div className="flex flex-col">
+        <button onClick={() => printState()}>
+          Print the current state!
+        </button>
 
-      <div className="relative flex w-full justify-center gap-x-32">
-        {renderActiveCourts()}
+        <button onClick={() => fillActiveCourts()}>
+          Fill the active courts using the available players!
+        </button>
       </div>
+
+      <ActiveCourts courts={activeCourts} />
 
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
         <a
