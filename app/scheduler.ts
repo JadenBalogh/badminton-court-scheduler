@@ -1,42 +1,17 @@
-type Player = {
-  id: number;
-  name: string;
-  skill: number;
-  timeStartedWaiting: number;
-  playersPlayedAt: { [id: number]: number };
-}
-
-type Players = Player[];
-
-const players: Players = [
-  { id: 1, name: "Player 1", skill: 1, timeStartedWaiting: Date.now(), playersPlayedAt: { 3: Date.now() - 360000 } },
-  { id: 2, name: "Player 2", skill: 2, timeStartedWaiting: Date.now(), playersPlayedAt: {} },
-  { id: 3, name: "Player 3", skill: 1, timeStartedWaiting: Date.now(), playersPlayedAt: {} },
-  { id: 4, name: "Player 4", skill: 3, timeStartedWaiting: Date.now(), playersPlayedAt: {} },
-  { id: 5, name: "Player 5", skill: 2, timeStartedWaiting: Date.now(), playersPlayedAt: {} },
-  { id: 6, name: "Player 6", skill: 1, timeStartedWaiting: Date.now(), playersPlayedAt: {} },
-  { id: 7, name: "Player 7", skill: 3, timeStartedWaiting: Date.now(), playersPlayedAt: {} },
-  { id: 8, name: "Player 8", skill: 3, timeStartedWaiting: Date.now(), playersPlayedAt: {} },
-  { id: 9, name: "Player 9", skill: 2, timeStartedWaiting: Date.now(), playersPlayedAt: {} },
-  { id: 10, name: "Player 10", skill: 2, timeStartedWaiting: Date.now(), playersPlayedAt: {} },
-];
-
-// let queue: Players = [];
-// let team1: Players = [];
-// let team2: Players = [];
+import { Player, Court } from '../types/types'
 
 function calculateDiversityScore(player: Player, candidate: Player): number {
-  if (!player.playersPlayedAt[candidate.id]) {
+  if (!player.lastPlayedTimes[candidate.id]) {
     return 480000; // 8 minutes in milliseconds
   } else {
     // return the elapsed time since they last played together
-    console.log("diversityScore for player", player.id, "and candidate", candidate.id, Date.now() - player.playersPlayedAt[candidate.id])
-    return Date.now() - player.playersPlayedAt[candidate.id];
+    console.log("diversityScore for player", player.id, "and candidate", candidate.id, Date.now() - player.lastPlayedTimes[candidate.id])
+    return Date.now() - player.lastPlayedTimes[candidate.id];
   }
 }
 
 function calculateTimeWaited(player: Player): number {
-  return Date.now() - player.timeStartedWaiting;
+  return Date.now() - player.waitStartTime;
 }
 
 function calculateTimeAndDiversityScore(player: Player, candidate: Player, timeCoefficient: number = 0.5, diversityCoefficient: number = 0.5): number {
@@ -44,10 +19,10 @@ function calculateTimeAndDiversityScore(player: Player, candidate: Player, timeC
 }
 
 function isSkillOkay(candidate: Player, player1: Player, player2: Player, player3: Player, skillVariance: number): boolean {
-  return Math.abs((player1.skill + player3.skill) - (candidate.skill + player2.skill)) <= skillVariance;
+  return Math.abs((player1.skillLevel + player3.skillLevel) - (candidate.skillLevel + player2.skillLevel)) <= skillVariance;
 }
 
-function selectFirstPlayer(queue: Players, team1: Players): void  {
+function selectFirstPlayer(queue: Player[], team1: Player[]): void  {
   const player = queue.shift();
   if (player) {
     team1.push(player);
@@ -56,7 +31,7 @@ function selectFirstPlayer(queue: Players, team1: Players): void  {
   }
 }
 
-function selectSecondPlayer(queue: Players, team1: Players, team2: Players, x: number): void {
+function selectSecondPlayer(queue: Player[], team1: Player[], team2: Player[], x: number): void {
   const player1 = team1[0];
   const player2 = queue
     .slice(0, x)
@@ -73,7 +48,7 @@ function selectSecondPlayer(queue: Players, team1: Players, team2: Players, x: n
   queue.splice(queue.indexOf(player2), 1);
 }
 
-function selectThirdPlayer(queue: Players, team1: Players, team2: Players, x: number): void {
+function selectThirdPlayer(queue: Player[], team1: Player[], team2: Player[], x: number): void {
   const player1 = team1[0];
   const player2 = team2[0];
   const player3 = queue
@@ -93,7 +68,7 @@ function selectThirdPlayer(queue: Players, team1: Players, team2: Players, x: nu
   queue.splice(queue.indexOf(player3), 1);
 }
 
-function selectFourthPlayer(queue: Players, team1: Players, team2: Players, x: number, skillVariance: number): void {
+function selectFourthPlayer(queue: Player[], team1: Player[], team2: Player[], x: number, skillVariance: number): void {
   const player1 = team1[0];
   const player2 = team2[0];
   const player3 = team1[1];
@@ -116,9 +91,9 @@ function selectFourthPlayer(queue: Players, team1: Players, team2: Players, x: n
   queue.splice(queue.indexOf(player4), 1);
 }
 
-function makeTeams(queue: Players, x: number = 6, skillVariance: number = 1) {
-  let team1: Players = [];
-  let team2: Players = [];
+function makeTeams(queue: Player[], x: number = 6, skillVariance: number = 1) {
+  let team1: Player[] = [];
+  let team2: Player[] = [];
   selectFirstPlayer(queue, team1);
   selectSecondPlayer(queue, team1, team2, x);
   selectThirdPlayer(queue, team1, team2, x);
@@ -127,4 +102,11 @@ function makeTeams(queue: Players, x: number = 6, skillVariance: number = 1) {
   return [team1, team2];
 }
 
-module.exports = makeTeams;
+function generateQueue(players: Player[]) {
+  console.log("TODO: Implement generateQueue()");
+}
+
+export const Scheduler = {
+  makeTeams,
+  generateQueue
+}

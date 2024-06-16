@@ -2,12 +2,14 @@
 
 import { Player, Court } from '../types/types'
 import ActiveCourts from './active-courts';
+import { Scheduler } from './scheduler';
 import React, { useState, useEffect } from 'react';
 
 export default function Home() {
   const COURT_COUNT = 3; // TODO: Replace with admin settings
   let [activePlayers, setActivePlayers] = useState<Player[]>([]);
   let [activeCourts, setActiveCourts] = useState<Court[]>([]);
+  let [courtQueue, setCourtQueue] = useState<Court[]>([]);
 
   useEffect(() => {
     loadData();
@@ -26,7 +28,9 @@ export default function Home() {
         let player: Player = {
           id: playerID,
           name: fields[0],
-          skillLevel: Number(fields[1])
+          skillLevel: Number(fields[1]),
+          waitStartTime: Date.now(),
+          lastPlayedTimes: {}
         };
 
         setActivePlayers(a => [...a, player]);
@@ -75,6 +79,10 @@ export default function Home() {
     console.log("Filled active courts.");
   }
 
+  function scheduleCourts() {
+    Scheduler.generateQueue(activePlayers);
+  }
+
   function printState() {
     console.log("Players:");
     console.log(activePlayers);
@@ -96,7 +104,11 @@ export default function Home() {
         </button>
 
         <button onClick={() => fillActiveCourts()}>
-          Fill the active courts using the available players!
+          Directly fill the active courts using the available players!
+        </button>
+
+        <button onClick={() => scheduleCourts()}>
+          Run the scheduling algorithm to fill the active courts!
         </button>
       </div>
 
