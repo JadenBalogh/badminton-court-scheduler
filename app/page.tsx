@@ -30,7 +30,8 @@ export default function Home() {
           name: fields[0],
           skillLevel: Number(fields[1]),
           lastPlayedTimestamp: Math.random() * 100000,
-          lastPartneredTimestamp: {}
+          lastPartneredTimestamp: {},
+          lastScheduledEndTimestamp: 0
         };
 
         setActivePlayers(a => [...a, player]);
@@ -80,7 +81,7 @@ export default function Home() {
   }
 
   function scheduleCourts() {
-    Scheduler.generateQueue(activePlayers);
+    Scheduler.generateQueue(activePlayers, 5);
   }
 
   function printState() {
