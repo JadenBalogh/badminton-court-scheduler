@@ -159,6 +159,9 @@ function generateQueue(players: Player[], numCourts: number) {
     scheduledEndTime += EXPECTED_GAME_DURATION;
   }
 
+  console.log("Generated court queue:");
+  console.log(result);
+
   return result;
 }
 
