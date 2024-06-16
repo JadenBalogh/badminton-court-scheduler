@@ -127,7 +127,7 @@ function generateQueue(players: Player[], numCourts: number) {
   let playerQueue: Player[] = [...players];
   playerQueue.sort((a, b) => a.lastPlayedTimestamp - b.lastPlayedTimestamp);
   console.log("Computed time-based player queue:");
-  console.log(playerQueue);
+  console.log([...playerQueue]);
 
   // Step 2: Perform greedy algorithm to select players to add to the next court
   let scheduledEndTime = Date.now() + EXPECTED_GAME_DURATION;
