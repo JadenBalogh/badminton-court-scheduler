@@ -22,7 +22,7 @@ function isSkillOkay(candidate: Player, player1: Player, player2: Player, player
   return Math.abs((player1.skillLevel + player3.skillLevel) - (candidate.skillLevel + player2.skillLevel)) <= skillVariance;
 }
 
-function selectFirstPlayer(queue: Player[], team1: Player[]): void  {
+function selectFirstPlayer(queue: Player[], team1: Player[]): void {
   const player = queue.shift();
   if (player) {
     team1.push(player);
@@ -54,9 +54,9 @@ function selectThirdPlayer(queue: Player[], team1: Player[], team2: Player[], x:
   const player3 = queue
     .slice(0, x)
     .reduce((pre, cur) => {
-      const preScore = calculateTimeAndDiversityScore(player1, pre) 
+      const preScore = calculateTimeAndDiversityScore(player1, pre)
         + calculateTimeAndDiversityScore(player2, pre);
-      const curScore = calculateTimeAndDiversityScore(player1, cur) 
+      const curScore = calculateTimeAndDiversityScore(player1, cur)
         + calculateTimeAndDiversityScore(player2, cur);
       if (preScore === curScore) {
         return pre;
@@ -74,19 +74,19 @@ function selectFourthPlayer(queue: Player[], team1: Player[], team2: Player[], x
   const player3 = team1[1];
   const candidates = queue.slice(0, x)
     .filter(candidate => isSkillOkay(candidate, player1, player2, player3, skillVariance));
-  const  player4 = candidates.reduce((pre, cur) => {
-      const preScore = calculateTimeAndDiversityScore(player1, pre) 
-        + calculateTimeAndDiversityScore(player2, pre) 
-        + calculateTimeAndDiversityScore(player3, pre);
-      const curScore = calculateTimeAndDiversityScore(player1, cur) 
-        + calculateTimeAndDiversityScore(player2, cur) 
-        + calculateTimeAndDiversityScore(player3, cur);
-      if (preScore === curScore) {
-        return pre;
-      } else {
-        return preScore > curScore ? pre : cur;
-      }
-    });
+  const player4 = candidates.reduce((pre, cur) => {
+    const preScore = calculateTimeAndDiversityScore(player1, pre)
+      + calculateTimeAndDiversityScore(player2, pre)
+      + calculateTimeAndDiversityScore(player3, pre);
+    const curScore = calculateTimeAndDiversityScore(player1, cur)
+      + calculateTimeAndDiversityScore(player2, cur)
+      + calculateTimeAndDiversityScore(player3, cur);
+    if (preScore === curScore) {
+      return pre;
+    } else {
+      return preScore > curScore ? pre : cur;
+    }
+  });
   team2.push(player4);
   queue.splice(queue.indexOf(player4), 1);
 }
