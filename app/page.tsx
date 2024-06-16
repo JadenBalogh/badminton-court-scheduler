@@ -29,8 +29,8 @@ export default function Home() {
           id: playerID,
           name: fields[0],
           skillLevel: Number(fields[1]),
-          waitStartTime: Date.now(),
-          lastPlayedTimes: {}
+          lastPlayedTimestamp: Math.random() * 100000,
+          lastPartneredTimestamp: {}
         };
 
         setActivePlayers(a => [...a, player]);
