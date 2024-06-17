@@ -81,7 +81,7 @@ export default function Home() {
   }
 
   function scheduleCourts() {
-    Scheduler.generateQueue(activePlayers, COURT_COUNT, 5, 0);
+    Scheduler.generateQueue(activePlayers, COURT_COUNT, 20, 0);
   }
 
   function printState() {

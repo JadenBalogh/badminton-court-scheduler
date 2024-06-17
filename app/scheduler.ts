@@ -1,5 +1,7 @@
 import { Player, Court } from '../types/types'
 
+const ADVANCED_DEBUG_LOGGING = false; // Enable advanced logging
+
 const EXPECTED_GAME_DURATION = 480000; // 8 minutes in milliseconds
 const MAX_TIME_SCORE_WAIT_TIME = 1800000; // 30 minutes in milliseconds
 const MAX_DIVERSITY_SCORE_PLAY_DELAY = 3600000; // 1 hour in milliseconds
@@ -58,12 +60,17 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
   // Consider only players that haven't already been selected as part of this team
   let candidates = playerQueue.slice(0, playerQueue.length - selectedPlayers.length);
 
-  console.log("Evaluating candidates:")
-  console.log([...candidates]);
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log("Evaluating candidates:")
+    console.log([...candidates]);
+  }
 
   // Optionally filter out any player that has a 0 skill score for this team (outside the allowed skill variance)
   if (skillVariance >= 0) {
-    candidates = candidates.filter(player => calculateSkillScore(player, selectedPlayers, skillVariance) > 0);
+    let skillFilterResults = candidates.filter(player => calculateSkillScore(player, selectedPlayers, skillVariance) > 0);
+    if (skillFilterResults.length > 0) {
+      candidates = skillFilterResults; // Only apply the skill filter if any valid players are left
+    }
   }
 
   // Reduce the candidates down to the highest scoring player
@@ -73,12 +80,14 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
     return prevPlayerScore >= currPlayerScore ? prevPlayer : currPlayer;
   });
 
-  console.log("Found best player with total score: " + calculateTotalScore(bestPlayer, gameStartTime, selectedPlayers, skillVariance));
-  console.log("Best player score breakdown:");
-  console.log(" -> TIME: " + calculateTimeScore(bestPlayer, gameStartTime) * TIME_SCORE_WEIGHT) + " (last scheduled end: " + bestPlayer.lastScheduledEndTimestamp + ")";
-  console.log(" -> DIVERSITY: " + calculateDiversityScore(bestPlayer, gameStartTime, selectedPlayers) * DIVERSITY_SCORE_WEIGHT);
-  console.log(" -> SKILL: " + calculateSkillScore(bestPlayer, selectedPlayers, skillVariance) * SKILL_SCORE_WEIGHT);
-  console.log(" -> Last Scheduled End: " + bestPlayer.lastScheduledEndTimestamp);
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log("Found best player with total score: " + calculateTotalScore(bestPlayer, gameStartTime, selectedPlayers, skillVariance));
+    console.log("Best player score breakdown:");
+    console.log(" -> TIME: " + calculateTimeScore(bestPlayer, gameStartTime) * TIME_SCORE_WEIGHT) + " (last scheduled end: " + bestPlayer.lastScheduledEndTimestamp + ")";
+    console.log(" -> DIVERSITY: " + calculateDiversityScore(bestPlayer, gameStartTime, selectedPlayers) * DIVERSITY_SCORE_WEIGHT);
+    console.log(" -> SKILL: " + calculateSkillScore(bestPlayer, selectedPlayers, skillVariance) * SKILL_SCORE_WEIGHT);
+    console.log(" -> Last Scheduled End: " + bestPlayer.lastScheduledEndTimestamp);
+  }
 
   return bestPlayer;
 }
@@ -99,6 +108,7 @@ function generateQueue(players: Player[], numCourts: number, queueLength: number
   // Step 1: Sort players by time played (longest wait first)
   let playerQueue: Player[] = [...players];
   playerQueue.sort((a, b) => a.lastPlayedTimestamp - b.lastPlayedTimestamp);
+
   console.log("Computed time-based player queue:");
   console.log([...playerQueue]);
 
@@ -116,38 +126,64 @@ function generateQueue(players: Player[], numCourts: number, queueLength: number
       scheduledGameTime += EXPECTED_GAME_DURATION;
     }
 
-    console.log("*****");
-    console.log("*****");
-    console.log("*****");
-    console.log("Scheduling Court " + i + " at time " + scheduledGameTime + "...");
+    if (ADVANCED_DEBUG_LOGGING) {
+      console.log("*****");
+      console.log("*****");
+      console.log("*****");
+      console.log("Scheduling Court " + i + " at time " + scheduledGameTime + "...");
+    }
 
     // Step 2a: Assign first player in queue to team 1
-    console.log("***");
-    console.log("Picking Team 1, Player 1...");
+    if (ADVANCED_DEBUG_LOGGING) {
+      console.log("***");
+      console.log("Picking Team 1, Player 1...");
+    }
+
     let team1Player1 = playerQueue[0];
     schedulePlayer(playerQueue, team1Player1, scheduledGameTime);
-    console.log(team1Player1);
+
+    if (ADVANCED_DEBUG_LOGGING) {
+      console.log(team1Player1);
+    }
 
     // Step 2b: Assign next best player in queue to team 2 using TIME and DIVERSITY heuristics
-    console.log("***");
-    console.log("Picking Team 2, Player 1...");
+    if (ADVANCED_DEBUG_LOGGING) {
+      console.log("***");
+      console.log("Picking Team 2, Player 1...");
+    }
+
     let team2Player1 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1]);
     schedulePlayer(playerQueue, team2Player1, scheduledGameTime);
-    console.log(team2Player1);
+
+    if (ADVANCED_DEBUG_LOGGING) {
+      console.log(team2Player1);
+    }
 
     // Step 2c: Assign next best player in queue to team 1 using TIME and DIVERSITY heuristics
-    console.log("***");
-    console.log("Picking Team 1, Player 2...");
+    if (ADVANCED_DEBUG_LOGGING) {
+      console.log("***");
+      console.log("Picking Team 1, Player 2...");
+    }
+
     let team1Player2 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1, team2Player1], skillVariance);
     schedulePlayer(playerQueue, team1Player2, scheduledGameTime);
-    console.log(team1Player2);
+
+    if (ADVANCED_DEBUG_LOGGING) {
+      console.log(team1Player2);
+    }
 
     // Step 2d: Assign next best player in queue to team 2 using TIME, DIVERSITY and SKILL heuristics
-    console.log("***");
-    console.log("Picking Team 2, Player 2...");
+    if (ADVANCED_DEBUG_LOGGING) {
+      console.log("***");
+      console.log("Picking Team 2, Player 2...");
+    }
+
     let team2Player2 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1, team2Player1, team1Player2], skillVariance);
     schedulePlayer(playerQueue, team2Player2, scheduledGameTime);
-    console.log(team2Player2);
+
+    if (ADVANCED_DEBUG_LOGGING) {
+      console.log(team2Player2);
+    }
 
     court.players = [team1Player1, team1Player2, team2Player1, team2Player2];
     result.push(court);
