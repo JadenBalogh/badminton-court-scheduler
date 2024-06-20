@@ -29,8 +29,10 @@ export default function Home() {
           id: playerID,
           name: fields[0],
           skillLevel: Number(fields[1]),
-          lastPlayedTimestamp: Math.random() * 100000,
-          lastPartneredTimestamp: {},
+          lastPlayedTimestamp: Date.now() - 1800000 + Math.floor(playerID / 4) * 240000,
+          lastPartneredTimestamp: lines
+            .map((val, idx) => ({ id: idx, timestamp: Date.now() - 3600000 + Math.floor(idx / 4) * 480000 }))
+            .reduce((obj, cur) => ({ ...obj, [cur.id]: cur.timestamp }), {}),
           lastScheduledEndTimestamp: 0
         };
 
