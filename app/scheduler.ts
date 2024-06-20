@@ -19,23 +19,29 @@ function calculateDiversityScore(player: Player, gameStartTime: number, otherPla
   return diversityScore / otherPlayers.length;
 }
 
-// Returns the normalized SKILL score for the given player. Skill difference more than skillVariance beyond the target value = 0.0 skill score. Exact skill match = 1.0 skill score.
+// Returns the normalized SKILL score for the given player. Skill variance more than maxSkillVariance beyond the target level = 0.0 skill score. Exact skill match = 1.0 skill score.
 function calculateSkillScore(player: Player, otherPlayers: Player[], settings: SessionSettings) {
-  if (otherPlayers.length < 2) {
-    return 0; // Skill score can only be calculated when at least one player has been picked on each team.
-  }
-
   let targetSkillLevel;
-  if (otherPlayers.length === 2) {
-    targetSkillLevel = otherPlayers[1].skillLevel; // When finding the 2nd team 1 player, aim to find one with the same skill level as the 1st team 2 player
+  let maxSkillVariance;
+
+  if (otherPlayers.length === 1) {
+    // When finding the 1st team 2 player, aim to find one with the same skill level as the 1st team 1 player, using individual variance
+    targetSkillLevel = otherPlayers[0].skillLevel;
+    maxSkillVariance = settings.maxIndividualSkillVariance;
+  } else if (otherPlayers.length === 2) {
+    // When finding the 2nd team 1 player, aim to find one with the same skill level as the 1st team 2 player, using team variance
+    targetSkillLevel = otherPlayers[1].skillLevel;
+    maxSkillVariance = settings.maxTeamSkillVariance;
   } else {
+    // When finding the 2nd team 2 player, aim to perfectly balance the team skill levels, using team variance
     let team1SkillLevel = otherPlayers[0].skillLevel + otherPlayers[2].skillLevel;
     let team2SkillLevel = otherPlayers[1].skillLevel;
-    targetSkillLevel = team1SkillLevel - team2SkillLevel; // When finding the last player on the court, aim to perfectly balance the team skill levels
+    targetSkillLevel = team1SkillLevel - team2SkillLevel;
+    maxSkillVariance = settings.maxTeamSkillVariance;
   }
 
-  let skillOffset = Math.abs(player.skillLevel - targetSkillLevel);
-  return 1 - Math.min(skillOffset / (settings.maxTeamSkillVariance + 1), 1);
+  let skillVariance = Math.abs(player.skillLevel - targetSkillLevel);
+  return 1 - Math.min(skillVariance / (maxSkillVariance + 1), 1);
 }
 
 // Returns the weighted sum of the TIME, DIVERSITY and SKILL scores
@@ -56,12 +62,10 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
     console.log([...candidates]);
   }
 
-  // Optionally filter out any player that has a 0 skill score for this team (outside the allowed skill variance)
-  if (selectedPlayers.length >= 2) {
-    let skillFilterResults = candidates.filter(player => calculateSkillScore(player, selectedPlayers, settings) > 0);
-    if (skillFilterResults.length > 0) {
-      candidates = skillFilterResults; // Only apply the skill filter if any valid players are left
-    }
+  // Try to filter out any player that has a 0 skill score for this team (outside the allowed skill variance)
+  let skillFilterResults = candidates.filter(player => calculateSkillScore(player, selectedPlayers, settings) > 0);
+  if (skillFilterResults.length > 0) {
+    candidates = skillFilterResults; // Only apply the skill filter if any valid players are left
   }
 
   // Reduce the candidates down to the highest scoring player
