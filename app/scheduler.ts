@@ -1,35 +1,26 @@
-import { Player, Court } from '../types/types'
+import { Player, Court, SessionSettings } from '../types/types'
 
 const ADVANCED_DEBUG_LOGGING = false; // Enable advanced logging
 
-const EXPECTED_GAME_DURATION = 480000; // 8 minutes in milliseconds
-const MAX_TIME_SCORE_WAIT_TIME = 1800000; // 30 minutes in milliseconds
-const MAX_DIVERSITY_SCORE_PLAY_DELAY = 3600000; // 1 hour in milliseconds
-
-// TODO: Move these heuristic weights into admin settings
-const TIME_SCORE_WEIGHT = 1;
-const DIVERSITY_SCORE_WEIGHT = 1;
-const SKILL_SCORE_WEIGHT = 1;
-
 // Returns the normalized TIME score for the given player. 0 minute wait = 0.0 time score. 30 minute wait = 1.0 time score.
-function calculateTimeScore(player: Player, gameStartTime: number) {
+function calculateTimeScore(player: Player, gameStartTime: number, settings: SessionSettings) {
   let waitTime = gameStartTime - player.lastScheduledEndTimestamp;
-  return Math.min(waitTime, MAX_TIME_SCORE_WAIT_TIME) / MAX_TIME_SCORE_WAIT_TIME;
+  return Math.min(waitTime, settings.maxTimeScoreWaitTime) / settings.maxTimeScoreWaitTime;
 }
 
 // Returns the normalized DIVERSITY score for the given player. Just played with all others = 0.0 diversity score. Played with all others 1+ hours ago = 1.0 time score.
-function calculateDiversityScore(player: Player, gameStartTime: number, otherPlayers: Player[]) {
+function calculateDiversityScore(player: Player, gameStartTime: number, otherPlayers: Player[], settings: SessionSettings) {
   let diversityScore = 0;
   for (let otherPlayer of otherPlayers) {
     let lastPartneredTime = player.lastPartneredTimestamp[otherPlayer.id] ? player.lastPartneredTimestamp[otherPlayer.id] : 0;
     let lastPlayedDelay = gameStartTime - lastPartneredTime;
-    diversityScore += Math.min(lastPlayedDelay, MAX_DIVERSITY_SCORE_PLAY_DELAY) / MAX_DIVERSITY_SCORE_PLAY_DELAY;
+    diversityScore += Math.min(lastPlayedDelay, settings.maxDiversityScoreWaitTime) / settings.maxDiversityScoreWaitTime;
   }
   return diversityScore / otherPlayers.length;
 }
 
 // Returns the normalized SKILL score for the given player. Skill difference more than skillVariance beyond the target value = 0.0 skill score. Exact skill match = 1.0 skill score.
-function calculateSkillScore(player: Player, otherPlayers: Player[], skillVariance: number) {
+function calculateSkillScore(player: Player, otherPlayers: Player[], settings: SessionSettings) {
   if (otherPlayers.length < 2) {
     return 0; // Skill score can only be calculated when at least one player has been picked on each team.
   }
@@ -44,19 +35,19 @@ function calculateSkillScore(player: Player, otherPlayers: Player[], skillVarian
   }
 
   let skillOffset = Math.abs(player.skillLevel - targetSkillLevel);
-  return 1 - Math.min(skillOffset / (skillVariance + 1), 1);
+  return 1 - Math.min(skillOffset / (settings.maxTeamSkillVariance + 1), 1);
 }
 
 // Returns the weighted sum of the TIME, DIVERSITY and SKILL scores
-function calculateTotalScore(player: Player, gameStartTime: number, otherPlayers: Player[], skillVariance: number) {
-  let timeScore = calculateTimeScore(player, gameStartTime) * TIME_SCORE_WEIGHT;
-  let diversityScore = calculateDiversityScore(player, gameStartTime, otherPlayers) * DIVERSITY_SCORE_WEIGHT;
-  let skillScore = calculateSkillScore(player, otherPlayers, skillVariance) * SKILL_SCORE_WEIGHT;
+function calculateTotalScore(player: Player, gameStartTime: number, otherPlayers: Player[], settings: SessionSettings) {
+  let timeScore = calculateTimeScore(player, gameStartTime, settings) * settings.timeScoreWeight;
+  let diversityScore = calculateDiversityScore(player, gameStartTime, otherPlayers, settings) * settings.diversityScoreWeight;
+  let skillScore = calculateSkillScore(player, otherPlayers, settings) * settings.skillScoreWeight;
   return timeScore + diversityScore + skillScore;
 }
 
 // Returns the index of best matching player in the queue based on TIME, DIVERSITY and SKILL heuristics
-function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selectedPlayers: Player[], skillVariance: number = -1) {
+function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selectedPlayers: Player[], settings: SessionSettings) {
   // Consider only players that haven't already been selected as part of this team
   let candidates = playerQueue.slice(0, playerQueue.length - selectedPlayers.length);
 
@@ -66,8 +57,8 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
   }
 
   // Optionally filter out any player that has a 0 skill score for this team (outside the allowed skill variance)
-  if (skillVariance >= 0) {
-    let skillFilterResults = candidates.filter(player => calculateSkillScore(player, selectedPlayers, skillVariance) > 0);
+  if (selectedPlayers.length >= 2) {
+    let skillFilterResults = candidates.filter(player => calculateSkillScore(player, selectedPlayers, settings) > 0);
     if (skillFilterResults.length > 0) {
       candidates = skillFilterResults; // Only apply the skill filter if any valid players are left
     }
@@ -75,17 +66,17 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
 
   // Reduce the candidates down to the highest scoring player
   let bestPlayer = candidates.reduce((prevPlayer, currPlayer) => {
-    let prevPlayerScore = calculateTotalScore(prevPlayer, gameStartTime, selectedPlayers, skillVariance);
-    let currPlayerScore = calculateTotalScore(currPlayer, gameStartTime, selectedPlayers, skillVariance);
+    let prevPlayerScore = calculateTotalScore(prevPlayer, gameStartTime, selectedPlayers, settings);
+    let currPlayerScore = calculateTotalScore(currPlayer, gameStartTime, selectedPlayers, settings);
     return prevPlayerScore >= currPlayerScore ? prevPlayer : currPlayer;
   });
 
   if (ADVANCED_DEBUG_LOGGING) {
-    console.log("Found best player with total score: " + calculateTotalScore(bestPlayer, gameStartTime, selectedPlayers, skillVariance));
+    console.log("Found best player with total score: " + calculateTotalScore(bestPlayer, gameStartTime, selectedPlayers, settings));
     console.log("Best player score breakdown:");
-    console.log(" -> TIME: " + calculateTimeScore(bestPlayer, gameStartTime) * TIME_SCORE_WEIGHT) + " (last scheduled end: " + bestPlayer.lastScheduledEndTimestamp + ")";
-    console.log(" -> DIVERSITY: " + calculateDiversityScore(bestPlayer, gameStartTime, selectedPlayers) * DIVERSITY_SCORE_WEIGHT);
-    console.log(" -> SKILL: " + calculateSkillScore(bestPlayer, selectedPlayers, skillVariance) * SKILL_SCORE_WEIGHT);
+    console.log(" -> TIME: " + calculateTimeScore(bestPlayer, gameStartTime, settings) * settings.timeScoreWeight) + " (last scheduled end: " + bestPlayer.lastScheduledEndTimestamp + ")";
+    console.log(" -> DIVERSITY: " + calculateDiversityScore(bestPlayer, gameStartTime, selectedPlayers, settings) * settings.diversityScoreWeight);
+    console.log(" -> SKILL: " + calculateSkillScore(bestPlayer, selectedPlayers, settings) * settings.skillScoreWeight);
     console.log(" -> Last Scheduled End: " + bestPlayer.lastScheduledEndTimestamp);
   }
 
@@ -93,14 +84,14 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
 }
 
 // Wraps the target player to the end of the queue and updates their scheduled next game end time
-function schedulePlayer(playerQueue: Player[], player: Player, gameStartTime: number) {
+function schedulePlayer(playerQueue: Player[], player: Player, gameStartTime: number, settings: SessionSettings) {
   let playerIndex = playerQueue.indexOf(player);
   playerQueue.splice(playerIndex, 1);
   playerQueue.push(player);
-  player.lastScheduledEndTimestamp = gameStartTime + EXPECTED_GAME_DURATION;
+  player.lastScheduledEndTimestamp = gameStartTime + settings.expectedGameDuration;
 }
 
-function generateQueue(players: Player[], numCourts: number, queueLength: number, skillVariance: number) {
+function generateQueue(players: Player[], queueLength: number, settings: SessionSettings) {
   console.log("Generating court queue...");
 
   let result: Court[] = []; // Generated queue of courts
@@ -122,8 +113,8 @@ function generateQueue(players: Player[], numCourts: number, queueLength: number
       players: []
     };
 
-    if (i > 0 && i % numCourts === 0) {
-      scheduledGameTime += EXPECTED_GAME_DURATION;
+    if (i > 0 && i % settings.courtCount === 0) {
+      scheduledGameTime += settings.expectedGameDuration;
     }
 
     if (ADVANCED_DEBUG_LOGGING) {
@@ -140,7 +131,7 @@ function generateQueue(players: Player[], numCourts: number, queueLength: number
     }
 
     let team1Player1 = playerQueue[0];
-    schedulePlayer(playerQueue, team1Player1, scheduledGameTime);
+    schedulePlayer(playerQueue, team1Player1, scheduledGameTime, settings);
 
     if (ADVANCED_DEBUG_LOGGING) {
       console.log(team1Player1);
@@ -152,8 +143,8 @@ function generateQueue(players: Player[], numCourts: number, queueLength: number
       console.log("Picking Team 2, Player 1...");
     }
 
-    let team2Player1 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1]);
-    schedulePlayer(playerQueue, team2Player1, scheduledGameTime);
+    let team2Player1 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1], settings);
+    schedulePlayer(playerQueue, team2Player1, scheduledGameTime, settings);
 
     if (ADVANCED_DEBUG_LOGGING) {
       console.log(team2Player1);
@@ -165,8 +156,8 @@ function generateQueue(players: Player[], numCourts: number, queueLength: number
       console.log("Picking Team 1, Player 2...");
     }
 
-    let team1Player2 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1, team2Player1], skillVariance);
-    schedulePlayer(playerQueue, team1Player2, scheduledGameTime);
+    let team1Player2 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1, team2Player1], settings);
+    schedulePlayer(playerQueue, team1Player2, scheduledGameTime, settings);
 
     if (ADVANCED_DEBUG_LOGGING) {
       console.log(team1Player2);
@@ -178,8 +169,8 @@ function generateQueue(players: Player[], numCourts: number, queueLength: number
       console.log("Picking Team 2, Player 2...");
     }
 
-    let team2Player2 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1, team2Player1, team1Player2], skillVariance);
-    schedulePlayer(playerQueue, team2Player2, scheduledGameTime);
+    let team2Player2 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1, team2Player1, team1Player2], settings);
+    schedulePlayer(playerQueue, team2Player2, scheduledGameTime, settings);
 
     if (ADVANCED_DEBUG_LOGGING) {
       console.log(team2Player2);

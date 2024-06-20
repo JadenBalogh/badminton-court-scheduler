@@ -16,3 +16,15 @@ export type Court = {
   id: number;
   players: Player[];
 }
+
+export type SessionSettings = {
+  courtCount: number;
+  maxTeamSkillVariance: number;
+  maxIndividualSkillVariance: number;
+  expectedGameDuration: number;
+  maxTimeScoreWaitTime: number;
+  maxDiversityScoreWaitTime: number;
+  timeScoreWeight: number;
+  diversityScoreWeight: number;
+  skillScoreWeight: number;
+}

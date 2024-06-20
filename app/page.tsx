@@ -1,12 +1,35 @@
 'use client'
 
-import { Player, Court } from '../types/types'
+import { Player, Court, SessionSettings } from '../types/types'
 import ActiveCourts from './active-courts';
 import { Scheduler } from './scheduler';
 import React, { useState, useEffect } from 'react';
 
+const COURT_COUNT = 3;
+const MAX_TEAM_SKILL_VARIANCE = 0;
+const MAX_INDIVIDUAL_SKILL_VARIANCE = 2;
+
+const EXPECTED_GAME_DURATION = 480000; // 8 minutes in milliseconds
+const MAX_TIME_SCORE_WAIT_TIME = 1800000; // 30 minutes in milliseconds
+const MAX_DIVERSITY_SCORE_PLAY_DELAY = 3600000; // 1 hour in milliseconds
+
+const TIME_SCORE_WEIGHT = 1;
+const DIVERSITY_SCORE_WEIGHT = 1;
+const SKILL_SCORE_WEIGHT = 1;
+
 export default function Home() {
-  const COURT_COUNT = 3; // TODO: Replace with admin settings
+  let [sessionSettings, setSessionSettings] = useState<SessionSettings>({
+    courtCount: COURT_COUNT,
+    maxTeamSkillVariance: MAX_TEAM_SKILL_VARIANCE,
+    maxIndividualSkillVariance: MAX_INDIVIDUAL_SKILL_VARIANCE,
+    expectedGameDuration: EXPECTED_GAME_DURATION,
+    maxTimeScoreWaitTime: MAX_TIME_SCORE_WAIT_TIME,
+    maxDiversityScoreWaitTime: MAX_DIVERSITY_SCORE_PLAY_DELAY,
+    timeScoreWeight: TIME_SCORE_WEIGHT,
+    diversityScoreWeight: DIVERSITY_SCORE_WEIGHT,
+    skillScoreWeight: SKILL_SCORE_WEIGHT,
+  });
+
   let [activePlayers, setActivePlayers] = useState<Player[]>([]);
   let [activeCourts, setActiveCourts] = useState<Court[]>([]);
   let [courtQueue, setCourtQueue] = useState<Court[]>([]);
@@ -83,7 +106,7 @@ export default function Home() {
   }
 
   function scheduleCourts() {
-    Scheduler.generateQueue(activePlayers, COURT_COUNT, 20, 0);
+    Scheduler.generateQueue(activePlayers, 20, sessionSettings);
   }
 
   function printState() {
