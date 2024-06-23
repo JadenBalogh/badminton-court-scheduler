@@ -1,13 +1,38 @@
 'use client'
 
-import { Player, Court } from '../types/types'
+import { Player, Court, SessionSettings } from '../types/types'
 import ActiveCourts from './active-courts';
+import { Scheduler } from './scheduler';
 import React, { useState, useEffect } from 'react';
 
+const COURT_COUNT = 3;
+const MAX_TEAM_SKILL_VARIANCE = 0;
+const MAX_INDIVIDUAL_SKILL_VARIANCE = 2;
+
+const EXPECTED_GAME_DURATION = 480000; // 8 minutes in milliseconds
+const MAX_TIME_SCORE_WAIT_TIME = 1800000; // 30 minutes in milliseconds
+const MAX_DIVERSITY_SCORE_PLAY_DELAY = 3600000; // 1 hour in milliseconds
+
+const TIME_SCORE_WEIGHT = 1;
+const DIVERSITY_SCORE_WEIGHT = 1;
+const SKILL_SCORE_WEIGHT = 1;
+
 export default function Home() {
-  const COURT_COUNT = 3; // TODO: Replace with admin settings
+  let [sessionSettings, setSessionSettings] = useState<SessionSettings>({
+    courtCount: COURT_COUNT,
+    maxTeamSkillVariance: MAX_TEAM_SKILL_VARIANCE,
+    maxIndividualSkillVariance: MAX_INDIVIDUAL_SKILL_VARIANCE,
+    expectedGameDuration: EXPECTED_GAME_DURATION,
+    maxTimeScoreWaitTime: MAX_TIME_SCORE_WAIT_TIME,
+    maxDiversityScoreWaitTime: MAX_DIVERSITY_SCORE_PLAY_DELAY,
+    timeScoreWeight: TIME_SCORE_WEIGHT,
+    diversityScoreWeight: DIVERSITY_SCORE_WEIGHT,
+    skillScoreWeight: SKILL_SCORE_WEIGHT,
+  });
+
   let [activePlayers, setActivePlayers] = useState<Player[]>([]);
   let [activeCourts, setActiveCourts] = useState<Court[]>([]);
+  let [courtQueue, setCourtQueue] = useState<Court[]>([]);
 
   useEffect(() => {
     loadData();
@@ -26,7 +51,12 @@ export default function Home() {
         let player: Player = {
           id: playerID,
           name: fields[0],
-          skillLevel: Number(fields[1])
+          skillLevel: Number(fields[1]),
+          lastPlayedTimestamp: Date.now() - 1800000 + Math.floor(playerID / 4) * 240000,
+          lastPartneredTimestamp: lines
+            .map((val, idx) => ({ id: idx, timestamp: Date.now() - 3600000 + Math.floor(idx / 4) * 480000 }))
+            .reduce((obj, cur) => ({ ...obj, [cur.id]: cur.timestamp }), {}),
+          lastScheduledEndTimestamp: 0
         };
 
         setActivePlayers(a => [...a, player]);
@@ -75,6 +105,10 @@ export default function Home() {
     console.log("Filled active courts.");
   }
 
+  function scheduleCourts() {
+    Scheduler.generateQueue(activePlayers, 20, sessionSettings);
+  }
+
   function printState() {
     console.log("Players:");
     console.log(activePlayers);
@@ -96,7 +130,11 @@ export default function Home() {
         </button>
 
         <button onClick={() => fillActiveCourts()}>
-          Fill the active courts using the available players!
+          Directly fill the active courts using the available players!
+        </button>
+
+        <button onClick={() => scheduleCourts()}>
+          Run the scheduling algorithm to fill the active courts!
         </button>
       </div>
 
