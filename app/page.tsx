@@ -37,7 +37,6 @@ export default function Home() {
 
   useEffect(() => {
     loadPlayerData();
-    loadTestData();
 
     async function loadPlayerData() {
       let data = await fetch('./player-data.txt');
@@ -56,6 +55,11 @@ export default function Home() {
         setPlayerDatas(arr => [...arr, player]);
       }
     }
+
+  }, []);
+
+  function loadTestPlayers() {
+    loadTestData();
 
     async function loadTestData() {
       let data = await fetch('./test-data.txt');
@@ -95,7 +99,7 @@ export default function Home() {
         setActiveCourts(a => [...a, court]);
       }
     }
-  }, []);
+  }
 
   function fillActiveCourts() {
     let newActiveCourts: Court[] = [];
@@ -149,6 +153,10 @@ export default function Home() {
       <div className="flex flex-col">
         <button onClick={() => printState()}>
           Print the current state!
+        </button>
+
+        <button onClick={() => loadTestPlayers()}>
+          Load test player data!
         </button>
 
         <button onClick={() => fillActiveCourts()}>
