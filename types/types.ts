@@ -12,6 +12,11 @@ export type Player = {
   lastScheduledEndTimestamp: number; // The hypothetical last played time in the queue, based on last scheduled time
 }
 
+export type PlayerData = {
+  name: string;
+  skillLevel: number;
+}
+
 export type Court = {
   id: number;
   players: Player[];

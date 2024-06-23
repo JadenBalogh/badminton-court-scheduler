@@ -1,6 +1,6 @@
 'use client'
 
-import { Player, Court, SessionSettings } from '../types/types'
+import { Player, Court, SessionSettings, PlayerData } from '../types/types'
 import ActiveCourts from './active-courts';
 import { Scheduler } from './scheduler';
 import React, { useState, useEffect } from 'react';
@@ -30,14 +30,34 @@ export default function Home() {
     skillScoreWeight: SKILL_SCORE_WEIGHT,
   });
 
+  let [playerDatas, setPlayerDatas] = useState<PlayerData[]>([]);
   let [activePlayers, setActivePlayers] = useState<Player[]>([]);
   let [activeCourts, setActiveCourts] = useState<Court[]>([]);
   let [courtQueue, setCourtQueue] = useState<Court[]>([]);
 
   useEffect(() => {
-    loadData();
+    loadPlayerData();
+    loadTestData();
 
-    async function loadData() {
+    async function loadPlayerData() {
+      let data = await fetch('./player-data.txt');
+      let text = await data.text();
+
+      setPlayerDatas([]);
+      let lines = text.split(/[\r\n]+/);
+
+      for (let line of lines) {
+        let fields = line.split(',');
+        let player: PlayerData = {
+          name: fields[0],
+          skillLevel: Number(fields[1])
+        };
+
+        setPlayerDatas(arr => [...arr, player]);
+      }
+    }
+
+    async function loadTestData() {
       let data = await fetch('./test-data.txt');
       let text = await data.text();
 
@@ -110,6 +130,8 @@ export default function Home() {
   }
 
   function printState() {
+    console.log("PlayerDatas:");
+    console.log(playerDatas);
     console.log("Players:");
     console.log(activePlayers);
     console.log("Courts:");
