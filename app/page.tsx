@@ -55,8 +55,11 @@ export default function Home() {
         setPlayerDatas(arr => [...arr, player]);
       }
     }
-
   }, []);
+
+  function getPlayerData(name: string) {
+    return playerDatas.find(data => data.name.trim().toLowerCase() == name.trim().toLowerCase());
+  }
 
   function loadTestPlayers() {
     loadTestData();
