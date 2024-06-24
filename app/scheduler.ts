@@ -12,7 +12,7 @@ function calculateTimeScore(player: Player, gameStartTime: number, settings: Ses
 function calculateDiversityScore(player: Player, gameStartTime: number, otherPlayers: Player[], settings: SessionSettings) {
   let diversityScore = 0;
   for (let otherPlayer of otherPlayers) {
-    let lastPartneredTime = player.lastPartneredTimestamp[otherPlayer.id] ? player.lastPartneredTimestamp[otherPlayer.id] : 0;
+    let lastPartneredTime = player.lastPartneredTimestamp[otherPlayer.name] ? player.lastPartneredTimestamp[otherPlayer.name] : 0;
     let lastPlayedDelay = gameStartTime - lastPartneredTime;
     diversityScore += Math.min(lastPlayedDelay, settings.maxDiversityScoreWaitTime) / settings.maxDiversityScoreWaitTime;
   }

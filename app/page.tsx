@@ -3,7 +3,7 @@
 import { Player, Court, SessionSettings, PlayerData } from '../types/types'
 import ActiveCourts from './active-courts';
 import { Scheduler } from './scheduler';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 
 const COURT_COUNT = 3;
 const MAX_TEAM_SKILL_VARIANCE = 0;
@@ -31,13 +31,14 @@ export default function Home() {
   });
 
   let [playerDatas, setPlayerDatas] = useState<PlayerData[]>([]); // Skill level data for all players in database (text file for now)
-  let [registeredPlayers, setRegisteredPlayers] = useState<Player[]>([]); // Generated list of registered players for the current session
+  let [registeredPlayers, setRegisteredPlayers] = useState<string[]>([]); // Generated list of registered players for the current session
   let [activePlayers, setActivePlayers] = useState<Player[]>([]); // Players who are actively included in the algorithm
   let [activeCourts, setActiveCourts] = useState<Court[]>([]);
   let [courtQueue, setCourtQueue] = useState<Court[]>([]);
 
   useEffect(() => {
     loadPlayerData();
+    loadRegisteredPlayers();
 
     async function loadPlayerData() {
       let data = await fetch('./player-data.txt');
@@ -49,17 +50,59 @@ export default function Home() {
       for (let line of lines) {
         let fields = line.split(',');
         let player: PlayerData = {
-          name: fields[0],
+          name: fields[0].trim().toLowerCase(),
           skillLevel: Number(fields[1])
         };
 
         setPlayerDatas(arr => [...arr, player]);
       }
     }
+
+    async function loadRegisteredPlayers() {
+      let data = await fetch('./registered-players.txt');
+      let text = await data.text();
+
+      setRegisteredPlayers([]);
+      let lines = text.split(/[\r\n]+/);
+
+      for (let line of lines) {
+        setRegisteredPlayers(arr => [...arr, line.trim().toLowerCase()]);
+      }
+    }
   }, []);
 
   function getPlayerData(name: string) {
-    return playerDatas.find(data => data.name.trim().toLowerCase() == name.trim().toLowerCase());
+    return playerDatas.find(data => data.name == name);
+  }
+
+  function onPlayerChecked(event: ChangeEvent<HTMLInputElement>) {
+    if (event.target.checked) {
+      addActivePlayer(event.target.value);
+    } else {
+      removeActivePlayer(event.target.value);
+    }
+  }
+
+  function addActivePlayer(name: string) {
+    let playerData = getPlayerData(name);
+
+    if (playerData === undefined) {
+      console.log("Failed to find player by name: " + name);
+      return;
+    }
+
+    let player: Player = {
+      name: name,
+      skillLevel: playerData ? playerData.skillLevel : 2,
+      lastPlayedTimestamp: 0,
+      lastPartneredTimestamp: {},
+      lastScheduledEndTimestamp: 0
+    };
+    setActivePlayers(a => [...a, player]);
+  }
+
+  function removeActivePlayer(name: string) {
+    setActivePlayers(a => [...a.filter(player => player.name != name)]);
   }
 
   function loadTestPlayers() {
@@ -77,12 +120,11 @@ export default function Home() {
       for (let line of lines) {
         let fields = line.split(',');
         let player: Player = {
-          id: playerID,
           name: fields[0],
           skillLevel: Number(fields[1]),
           lastPlayedTimestamp: Date.now() - 1800000 + Math.floor(playerID / 4) * 240000,
           lastPartneredTimestamp: lines
-            .map((val, idx) => ({ id: idx, timestamp: Date.now() - 3600000 + Math.floor(idx / 4) * 480000 }))
+            .map((val, idx) => ({ id: val.split(',')[0], timestamp: Date.now() - 3600000 + Math.floor(idx / 4) * 480000 }))
             .reduce((obj, cur) => ({ ...obj, [cur.id]: cur.timestamp }), {}),
           lastScheduledEndTimestamp: 0
         };
@@ -174,74 +216,16 @@ export default function Home() {
 
       <ActiveCourts courts={activeCourts} />
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+      <div className="flex flex-col py-12">
+        <h2 className={`mb-3 text-2xl font-semibold`}>
+          Active Players
+        </h2>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+        {registeredPlayers.map((player, idx) =>
+          <div key={idx}>
+            <input type="checkbox" value={player} onChange={(event) => onPlayerChecked(event)} /> {player}
+          </div>
+        )}
       </div>
     </main>
   );

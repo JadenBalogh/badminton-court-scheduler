@@ -3,7 +3,7 @@ Jaden Balogh, 3
 Julia Bandura, 3
 Jenny Bao, 2
 Chuck Cai, 1
-Rich Chen, 3
+Richard Chen, 3
 Emily Cheng, 3
 Edward Choi, 3
 Clemence Chu, 3
@@ -15,8 +15,8 @@ Francis He, 3
 Jensen Ho, 3
 Bingjie Hou, 1
 Tehchin Hsieh, 3
-Jenny YuQing Huang, 2
-Lucia Huang, 1
+Jenny Huang, 2
+Lucia MingHsuan Huang, 1
 Zhena Huang, 2
 Felicia Jiang, 3
 Yazhao Jin, 2
@@ -36,8 +36,16 @@ Daisy Xiao, 2
 Chensheng Xu, 3
 Yang Yang, 3
 Jack Yiu, 3
-Kelly Jiatong Zhang, 2
+Kelly Zhang, 2
 Yong Zhang, 3
 Robin Zhang, 3
 Jingyi Zhou, 2
 Ray Zhu, 2
+Nanyi Bi, 2
+Qi Mai, 2
+Leonie Chen, 2
+Wesley Burnawan, 3
+Justin Ko, 3
+Tony Cui, 3
+Carrie Liang, 2
+Jinzhen Dou, 2
