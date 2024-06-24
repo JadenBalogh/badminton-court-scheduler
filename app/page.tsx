@@ -30,8 +30,9 @@ export default function Home() {
     skillScoreWeight: SKILL_SCORE_WEIGHT,
   });
 
-  let [playerDatas, setPlayerDatas] = useState<PlayerData[]>([]);
-  let [activePlayers, setActivePlayers] = useState<Player[]>([]);
+  let [playerDatas, setPlayerDatas] = useState<PlayerData[]>([]); // Skill level data for all players in database (text file for now)
+  let [registeredPlayers, setRegisteredPlayers] = useState<Player[]>([]); // Generated list of registered players for the current session
+  let [activePlayers, setActivePlayers] = useState<Player[]>([]); // Players who are actively included in the algorithm
   let [activeCourts, setActiveCourts] = useState<Court[]>([]);
   let [courtQueue, setCourtQueue] = useState<Court[]>([]);
 
