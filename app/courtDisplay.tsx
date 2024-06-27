@@ -1,6 +1,6 @@
 import { Court } from '../types/types';
 import Image from "next/image";
-import CourtPlayer from "./court-player";
+import CourtPlayer from "./courtPlayer";
 
 type CourtProps = {
   court: Court;

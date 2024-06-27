@@ -1,7 +1,7 @@
 'use client'
 
 import { Player, Court, SessionSettings, PlayerData } from '../types/types'
-import ActiveCourts from './active-courts';
+import ActiveCourts from './activeCourts';
 import { Scheduler } from './scheduler';
 import React, { useState, useEffect, ChangeEvent } from 'react';
 

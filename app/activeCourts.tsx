@@ -1,5 +1,5 @@
 import { Court } from '../types/types';
-import CourtDisplay from "./court";
+import CourtDisplay from "./courtDisplay";
 
 type ActiveCourtsProps = {
   courts: Court[];
