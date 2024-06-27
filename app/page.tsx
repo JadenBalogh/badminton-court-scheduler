@@ -36,9 +36,11 @@ export default function Home() {
   let [activeCourts, setActiveCourts] = useState<Court[]>([]);
   let [courtQueue, setCourtQueue] = useState<Court[]>([]);
 
+  // Load player data, load registered players and initialize empty courts
   useEffect(() => {
     loadPlayerData();
     loadRegisteredPlayers();
+    initializeEmptyCourts();
 
     async function loadPlayerData() {
       let data = await fetch('./player-data.txt');
@@ -69,7 +71,20 @@ export default function Home() {
         setRegisteredPlayers(arr => [...arr, line.trim().toLowerCase()]);
       }
     }
+
+
   }, []);
+
+  function initializeEmptyCourts() {
+    let emptyCourts: Court[] = [];
+    for (let i = 0; i < sessionSettings.courtCount; i++) {
+      emptyCourts.push({
+        id: i,
+        players: []
+      });
+    }
+    setActiveCourts(emptyCourts);
+  }
 
   function getPlayerData(name: string) {
     return playerDatas.find(data => data.name == name);
@@ -94,7 +109,7 @@ export default function Home() {
     let player: Player = {
       name: name,
       skillLevel: playerData ? playerData.skillLevel : 2,
-      lastPlayedTimestamp: 0,
+      lastPlayedTimestamp: Date.now(),
       lastPartneredTimestamp: {},
       lastScheduledEndTimestamp: 0
     };
@@ -175,13 +190,75 @@ export default function Home() {
     console.log("Filled active courts.");
   }
 
-  function scheduleCourts() {
-    Scheduler.generateQueue(activePlayers, 20, sessionSettings);
+  function fillEmptyCourtsFromCourtQueue(games: Court[]): number {
+    let i = 0;
+
+    setActiveCourts(
+      activeCourts.map(court => {
+        if (court.players.length === 0 && games[i]) {
+          console.log("Court", court.id, "is empty, filling with game queue number", i, "for players", games[i].players);
+          const newPlayers = games[i].players;
+          i++;
+          return { ...court, players: newPlayers };
+        }
+        return court;
+      })
+    );
+
+    return i;
+  }
+
+  function handleScheduleCourts() {
+    const games = Scheduler.generateQueue(activePlayers, 20, sessionSettings);
+    setCourtQueue(games);
+
+    const courtsFilled = fillEmptyCourtsFromCourtQueue(games);
+
+    if (courtsFilled > 0) {
+      setCourtQueue(courtQueue.slice(courtsFilled));
+    }
+  }
+
+  function handleCourtFinishesGame(i: number) {
+    console.log("Finishing game " + i + " at " + Date.now());
+
+    // Remove players from court
+    setActiveCourts(
+      activeCourts.map((court, id) => {
+        if (court.id === i) {
+          return { ...court, players: [] };
+        }
+        return court;
+      })
+    );
+
+    function isPlayerInCourt(player: Player, court: Court) {
+      return court.players.some(p => p.name === player.name);
+    }
+
+    function updateLastPartneredTimestamp(player: Player, players: Player[]) {
+      players.filter(p => p.name !== player.name).forEach((p) => {
+        player.lastPartneredTimestamp[p.name] = Date.now();
+      });
+    }
+
+    // Update players last played timestamps and last partnered timestamps
+    setActivePlayers(
+      activePlayers.map((player) => {
+        if (isPlayerInCourt(player, activeCourts[i])) {
+          updateLastPartneredTimestamp(player, activeCourts[i].players);
+          return { ...player, lastPlayedTimestamp: Date.now() };
+        }
+        return player;
+      })
+    );
+
+    // handleScheduleCourts();
   }
 
   function printState() {
-    console.log("PlayerDatas:");
-    console.log(playerDatas);
+    // console.log("PlayerDatas:");
+    // console.log(playerDatas);
     console.log("Players:");
     console.log(activePlayers);
     console.log("Courts:");
@@ -201,31 +278,52 @@ export default function Home() {
           Print the current state!
         </button>
 
-        <button onClick={() => loadTestPlayers()}>
+        {/* <button onClick={() => loadTestPlayers()}>
           Load test player data!
-        </button>
+        </button> */}
 
-        <button onClick={() => fillActiveCourts()}>
+        {/* <button onClick={() => fillActiveCourts()}>
           Directly fill the active courts using the available players!
+        </button> */}
+
+        <button onClick={handleScheduleCourts}>
+          Run the scheduling algorithm to fill the active courts!
         </button>
 
-        <button onClick={() => scheduleCourts()}>
-          Run the scheduling algorithm to fill the active courts!
+        <button onClick={() => initializeEmptyCourts()}>
+          Clear all courts!
         </button>
       </div>
 
-      <ActiveCourts courts={activeCourts} />
+      <ActiveCourts courts={activeCourts} handleCourtFinishesGame={handleCourtFinishesGame} />
 
-      <div className="flex flex-col py-12">
+      <div className="flex gap-2">
+        <div className="flex flex-col py-12">
+          <h2 className={`mb-3 text-2xl font-semibold`}>
+            Active Players
+          </h2>
+
+          {registeredPlayers.map((player, idx) =>
+            <div key={idx}>
+              <input type="checkbox" value={player} onChange={(event) => onPlayerChecked(event)} /> {player}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col py-12">
         <h2 className={`mb-3 text-2xl font-semibold`}>
-          Active Players
+          Next Games
         </h2>
 
-        {registeredPlayers.map((player, idx) =>
-          <div key={idx}>
-            <input type="checkbox" value={player} onChange={(event) => onPlayerChecked(event)} /> {player}
+        {courtQueue.slice(0, 3).map((game, i) => 
+          <div key={i}>
+            <p>{game.players[0].name} + {game.players[1].name}</p>
+            <p>vs</p>
+            <p>{game.players[2].name} + {game.players[3].name}</p>
+            <p>--------------------</p>
           </div>
         )}
+      </div>
       </div>
     </main>
   );
