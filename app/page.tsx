@@ -18,7 +18,7 @@ const DIVERSITY_SCORE_WEIGHT = 1;
 const SKILL_SCORE_WEIGHT = 1;
 
 export default function Home() {
-  let [sessionSettings, setSessionSettings] = useState<SessionSettings>({
+  const [sessionSettings, setSessionSettings] = useState<SessionSettings>({
     courtCount: COURT_COUNT,
     maxTeamSkillVariance: MAX_TEAM_SKILL_VARIANCE,
     maxIndividualSkillVariance: MAX_INDIVIDUAL_SKILL_VARIANCE,
@@ -30,11 +30,12 @@ export default function Home() {
     skillScoreWeight: SKILL_SCORE_WEIGHT,
   });
 
-  let [playerDatas, setPlayerDatas] = useState<PlayerData[]>([]); // Skill level data for all players in database (text file for now)
-  let [registeredPlayers, setRegisteredPlayers] = useState<string[]>([]); // Generated list of registered players for the current session
-  let [activePlayers, setActivePlayers] = useState<Player[]>([]); // Players who are actively included in the algorithm
-  let [activeCourts, setActiveCourts] = useState<Court[]>([]);
-  let [courtQueue, setCourtQueue] = useState<Court[]>([]);
+  const [playerDatas, setPlayerDatas] = useState<PlayerData[]>([]); // Skill level data for all players in database (text file for now)
+  const [registeredPlayers, setRegisteredPlayers] = useState<string[]>([]); // Generated list of registered players for the current session
+  const [activePlayers, setActivePlayers] = useState<Player[]>([]); // Players who are actively included in the algorithm
+  const [activeCourts, setActiveCourts] = useState<Court[]>([]);
+  const [courtQueue, setCourtQueue] = useState<Court[]>([]);
+  const [newGame, setNewGame] = useState<Court>();
 
   // Load player data, load registered players and initialize empty courts
   useEffect(() => {
@@ -190,7 +191,7 @@ export default function Home() {
     console.log("Filled active courts.");
   }
 
-  function fillEmptyCourtsFromCourtQueue(games: Court[]): number {
+  function fillEmptyCourtsFromCourtQueue(games: Court[]) {
     let i = 0;
 
     setActiveCourts(
@@ -205,18 +206,20 @@ export default function Home() {
       })
     );
 
-    return i;
+    if (i > 0) {
+      setCourtQueue(courtQueue => courtQueue.slice(i));
+    }
+  }
+
+  function runAlgorithmAndUpdateCourtQueue() {
+    const games = Scheduler.generateQueue(activePlayers, 20, sessionSettings);
+    setCourtQueue(games);
+    return games;
   }
 
   function handleScheduleCourts() {
-    const games = Scheduler.generateQueue(activePlayers, 20, sessionSettings);
-    setCourtQueue(games);
-
-    const courtsFilled = fillEmptyCourtsFromCourtQueue(games);
-
-    if (courtsFilled > 0) {
-      setCourtQueue(courtQueue.slice(courtsFilled));
-    }
+    const games = runAlgorithmAndUpdateCourtQueue();
+    fillEmptyCourtsFromCourtQueue(games);
   }
 
   function handleCourtFinishesGame(i: number) {
@@ -224,13 +227,14 @@ export default function Home() {
 
     // Remove players from court
     setActiveCourts(
-      activeCourts.map((court, id) => {
+      activeCourts.map((court) => {
         if (court.id === i) {
           return { ...court, players: [] };
         }
         return court;
       })
     );
+    console.log("Removed players from court " + i);
 
     function isPlayerInCourt(player: Player, court: Court) {
       return court.players.some(p => p.name === player.name);
@@ -252,8 +256,56 @@ export default function Home() {
         return player;
       })
     );
+    console.log("Updated players last played timestamps and last partnered timestamps");
 
-    // handleScheduleCourts();
+    // Pop next game from court queue and set it as the new game
+    const nextGame = courtQueue[0];
+    setNewGame(nextGame);
+    setCourtQueue(prevCourtQueue => prevCourtQueue.slice(1));
+  }
+
+  // Fill in the empty court with the next game popped from the queue
+  useEffect(() => {
+    if (newGame) {
+      setActiveCourts(
+        activeCourts.map(court => {
+          if (court.players.length === 0) {
+            console.log("Court", court.id, "is empty, filling with players", newGame.players);
+            const newPlayers = newGame.players;
+            return { ...court, players: newPlayers };
+          }
+          return court;
+        })
+      );
+
+      // Rerun the algorithm and update the court queue
+      runAlgorithmAndUpdateCourtQueue();
+    }
+  }, [newGame]);
+
+  // TODO: write algorithm to pick the best player to fill in the spot
+  function handleSkipPlayer(player: Player) {
+    console.log("Skipping player", player.name);
+
+    setActiveCourts(
+      activeCourts.map((court) => {
+        if (court.players.some(p => p.name === player.name)) {
+          return { ...court, players: court.players.filter(p => p.name !== player.name) };
+        }
+        return court;
+      })
+    );
+
+    setActivePlayers(
+      activePlayers.map((p) => {
+        if (p.name === player.name) {
+          return { ...p, lastPlayedTimestamp: Date.now() - MAX_TIME_SCORE_WAIT_TIME };
+        }
+        return p;
+      })
+    )
+
+    // TODO: add it here
   }
 
   function printState() {
@@ -263,6 +315,8 @@ export default function Home() {
     console.log(activePlayers);
     console.log("Courts:");
     console.log(activeCourts);
+    console.log("Court Queue:");
+    console.log(courtQueue);
   }
 
   return (
@@ -274,7 +328,7 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col">
-        <button onClick={() => printState()}>
+        <button onClick={printState}>
           Print the current state!
         </button>
 
@@ -290,12 +344,16 @@ export default function Home() {
           Run the scheduling algorithm to fill the active courts!
         </button>
 
-        <button onClick={() => initializeEmptyCourts()}>
+        <button onClick={initializeEmptyCourts}>
           Clear all courts!
         </button>
       </div>
 
-      <ActiveCourts courts={activeCourts} handleCourtFinishesGame={handleCourtFinishesGame} />
+      <ActiveCourts
+        courts={activeCourts}
+        handleCourtFinishesGame={handleCourtFinishesGame}
+        handleSkipPlayer={handleSkipPlayer}
+      />
 
       <div className="flex gap-2">
         <div className="flex flex-col py-12">
@@ -315,7 +373,7 @@ export default function Home() {
           Next Games
         </h2>
 
-        {courtQueue.slice(0, 3).map((game, i) => 
+        {courtQueue.slice(0, 1).map((game, i) => 
           <div key={i}>
             <p>{game.players[0].name} + {game.players[1].name}</p>
             <p>vs</p>
