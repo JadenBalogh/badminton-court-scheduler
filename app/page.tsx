@@ -3,7 +3,7 @@
 import { Player, Court, SessionSettings, PlayerData } from '../types/types'
 import ActiveCourts from './activeCourts';
 import { Scheduler } from './scheduler';
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 
 const COURT_COUNT = 3;
 const MAX_TEAM_SKILL_VARIANCE = 0;
@@ -36,6 +36,8 @@ export default function Home() {
   const [activeCourts, setActiveCourts] = useState<Court[]>([]);
   const [courtQueue, setCourtQueue] = useState<Court[]>([]);
   const [newGame, setNewGame] = useState<Court>();
+
+  const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Load player data, load registered players and initialize empty courts
   useEffect(() => {
@@ -211,7 +213,7 @@ export default function Home() {
     }
   }
 
-  function runAlgorithmAndUpdateCourtQueue() {
+  function runAlgorithmAndUpdateCourtQueue(): Court[] {
     const games = Scheduler.generateQueue(activePlayers, 20, sessionSettings);
     setCourtQueue(games);
     return games;
@@ -265,6 +267,7 @@ export default function Home() {
   }
 
   // Fill in the empty court with the next game popped from the queue
+  // Rerun the algorithm and update the court queue
   useEffect(() => {
     if (newGame) {
       setActiveCourts(
@@ -319,6 +322,18 @@ export default function Home() {
     console.log(courtQueue);
   }
 
+  function handleCheckAllPlayers() {
+    checkboxRefs.current.forEach(ref => {
+      if (ref && !ref.checked) {
+        ref.checked = true;
+        addActivePlayer(ref.value);
+      } else if (ref) {
+        ref.checked = false;
+        removeActivePlayer(ref.value);
+      }
+    });
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
@@ -339,6 +354,10 @@ export default function Home() {
         {/* <button onClick={() => fillActiveCourts()}>
           Directly fill the active courts using the available players!
         </button> */}
+
+        <button onClick={handleCheckAllPlayers}>
+          Check and uncheck all players!
+        </button>
 
         <button onClick={handleScheduleCourts}>
           Run the scheduling algorithm to fill the active courts!
@@ -363,7 +382,13 @@ export default function Home() {
 
           {registeredPlayers.map((player, idx) =>
             <div key={idx}>
-              <input type="checkbox" value={player} onChange={(event) => onPlayerChecked(event)} /> {player}
+              <input
+                type="checkbox"
+                value={player}
+                onChange={(event) => onPlayerChecked(event)}
+                ref={el => checkboxRefs.current[idx] = el}
+              />
+                {player}
             </div>
           )}
         </div>
