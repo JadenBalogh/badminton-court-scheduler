@@ -1,5 +1,6 @@
 'use client'
 
+import { clear } from 'console';
 import { Player, Court, SessionSettings, PlayerData } from '../types/types'
 import ActiveCourts from './activeCourts';
 import { Scheduler } from './scheduler';
@@ -43,7 +44,7 @@ export default function Home() {
   useEffect(() => {
     loadPlayerData();
     loadRegisteredPlayers();
-    initializeEmptyCourts();
+    clearCourts();
 
     async function loadPlayerData() {
       let data = await fetch('./player-data.txt');
@@ -74,11 +75,9 @@ export default function Home() {
         setRegisteredPlayers(arr => [...arr, line.trim().toLowerCase()]);
       }
     }
-
-
   }, []);
 
-  function initializeEmptyCourts() {
+  function clearCourts() {
     let emptyCourts: Court[] = [];
     for (let i = 0; i < sessionSettings.courtCount; i++) {
       emptyCourts.push({
@@ -123,77 +122,7 @@ export default function Home() {
     setActivePlayers(a => [...a.filter(player => player.name != name)]);
   }
 
-  function loadTestPlayers() {
-    loadTestData();
-
-    async function loadTestData() {
-      let data = await fetch('./test-data.txt');
-      let text = await data.text();
-
-      setActivePlayers([]);
-
-      let playerID = 0;
-      let lines = text.split(/[\r\n]+/);
-
-      for (let line of lines) {
-        let fields = line.split(',');
-        let player: Player = {
-          name: fields[0],
-          skillLevel: Number(fields[1]),
-          lastPlayedTimestamp: Date.now() - 1800000 + Math.floor(playerID / 4) * 240000,
-          lastPartneredTimestamp: lines
-            .map((val, idx) => ({ id: val.split(',')[0], timestamp: Date.now() - 3600000 + Math.floor(idx / 4) * 480000 }))
-            .reduce((obj, cur) => ({ ...obj, [cur.id]: cur.timestamp }), {}),
-          lastScheduledEndTimestamp: 0
-        };
-
-        setActivePlayers(a => [...a, player]);
-
-        playerID++;
-      }
-
-      setActiveCourts([]);
-
-      for (let i = 0; i < COURT_COUNT; i++) {
-        let court: Court = {
-          id: i,
-          players: []
-        };
-
-        setActiveCourts(a => [...a, court]);
-      }
-    }
-  }
-
-  function fillActiveCourts() {
-    let newActiveCourts: Court[] = [];
-
-    for (let i = 0; i < 4 * COURT_COUNT; i++) {
-      let courtIdx = Math.floor(i / 4);
-      let courtPlayerIdx = i % 4;
-
-      if (courtIdx >= activeCourts.length) {
-        break;
-      }
-
-      if (!newActiveCourts[courtIdx]) {
-        newActiveCourts.push({
-          id: courtIdx,
-          players: []
-        })
-      }
-
-      if (i < activePlayers.length) {
-        newActiveCourts[courtIdx].players[courtPlayerIdx] = activePlayers[i];
-        console.log(`Setting [Court ${courtIdx}, Player ${courtPlayerIdx}] = ${activePlayers[i].name}`);
-      }
-    }
-
-    setActiveCourts(newActiveCourts);
-    console.log("Filled active courts.");
-  }
-
-  function fillEmptyCourtsFromCourtQueue(games: Court[]) {
+  function fillEmptyCourts(games: Court[]) {
     let i = 0;
 
     setActiveCourts(
@@ -213,18 +142,18 @@ export default function Home() {
     }
   }
 
-  function runAlgorithmAndUpdateCourtQueue(): Court[] {
-    const games = Scheduler.generateQueue(activePlayers, 20, sessionSettings);
-    setCourtQueue(games);
-    return games;
+  function scheduleCourts(): Court[] {
+    const generatedCourts = Scheduler.generateQueue(activePlayers, 5, sessionSettings);
+    setCourtQueue(generatedCourts);
+    return generatedCourts;
   }
 
   function handleScheduleCourts() {
-    const games = runAlgorithmAndUpdateCourtQueue();
-    fillEmptyCourtsFromCourtQueue(games);
+    const scheduledCourts = scheduleCourts();
+    fillEmptyCourts(scheduledCourts);
   }
 
-  function handleCourtFinishesGame(i: number) {
+  function handleGameFinished(i: number) {
     console.log("Finishing game " + i + " at " + Date.now());
 
     // Remove players from court
@@ -282,7 +211,7 @@ export default function Home() {
       );
 
       // Rerun the algorithm and update the court queue
-      runAlgorithmAndUpdateCourtQueue();
+      scheduleCourts();
     }
   }, [newGame]);
 
@@ -363,14 +292,14 @@ export default function Home() {
           Run the scheduling algorithm to fill the active courts!
         </button>
 
-        <button onClick={initializeEmptyCourts}>
+        <button onClick={clearCourts}>
           Clear all courts!
         </button>
       </div>
 
       <ActiveCourts
         courts={activeCourts}
-        handleCourtFinishesGame={handleCourtFinishesGame}
+        handleGameFinished={handleGameFinished}
         handleSkipPlayer={handleSkipPlayer}
       />
 
@@ -388,25 +317,25 @@ export default function Home() {
                 onChange={(event) => onPlayerChecked(event)}
                 ref={el => checkboxRefs.current[idx] = el}
               />
-                {player}
+              {player}
             </div>
           )}
         </div>
 
         <div className="flex flex-col py-12">
-        <h2 className={`mb-3 text-2xl font-semibold`}>
-          Next Games
-        </h2>
+          <h2 className={`mb-3 text-2xl font-semibold`}>
+            Next Games
+          </h2>
 
-        {courtQueue.slice(0, 1).map((game, i) => 
-          <div key={i}>
-            <p>{game.players[0].name} + {game.players[1].name}</p>
-            <p>vs</p>
-            <p>{game.players[2].name} + {game.players[3].name}</p>
-            <p>--------------------</p>
-          </div>
-        )}
-      </div>
+          {courtQueue.map((game, i) =>
+            <div key={i}>
+              <p>{game.players[0].name} + {game.players[1].name}</p>
+              <p>vs</p>
+              <p>{game.players[2].name} + {game.players[3].name}</p>
+              <p>--------------------</p>
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
