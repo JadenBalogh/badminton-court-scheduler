@@ -265,24 +265,10 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          This is the test page for Badminton Court Scheduler.
-        </p>
-      </div>
-
       <div className="flex flex-col">
         <button onClick={printState}>
           Print the current state!
         </button>
-
-        {/* <button onClick={() => loadTestPlayers()}>
-          Load test player data!
-        </button> */}
-
-        {/* <button onClick={() => fillActiveCourts()}>
-          Directly fill the active courts using the available players!
-        </button> */}
 
         <button onClick={handleCheckAllPlayers}>
           Check and uncheck all players!
