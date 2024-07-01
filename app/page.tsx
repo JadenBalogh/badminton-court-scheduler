@@ -1,6 +1,5 @@
 'use client'
 
-import { clear } from 'console';
 import { Player, Court, SessionSettings, PlayerData } from '../types/types'
 import ActiveCourts from './activeCourts';
 import { Scheduler } from './scheduler';
