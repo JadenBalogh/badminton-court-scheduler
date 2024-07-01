@@ -122,14 +122,19 @@ export default function Home() {
     setActivePlayers(a => [...a.filter(player => player.name != name)]);
   }
 
-  function fillEmptyCourts(games: Court[]) {
+  // Starts a specified game at the given court index
+  function startGame(index: number, court: Court) {
+
+  }
+
+  function fillEmptyCourts(queue: Court[]) {
     let i = 0;
 
     setActiveCourts(
       activeCourts.map(court => {
-        if (court.players.length === 0 && games[i]) {
-          console.log("Court", court.id, "is empty, filling with game queue number", i, "for players", games[i].players);
-          const newPlayers = games[i].players;
+        if (court.players.length === 0 && queue[i]) {
+          console.log("Court", court.id, "is empty, filling with game queue number", i, "for players", queue[i].players);
+          const newPlayers = queue[i].players;
           i++;
           return { ...court, players: newPlayers };
         }
@@ -142,15 +147,15 @@ export default function Home() {
     }
   }
 
-  function scheduleCourts(): Court[] {
-    const generatedCourts = Scheduler.generateQueue(activePlayers, 5, sessionSettings);
-    setCourtQueue(generatedCourts);
-    return generatedCourts;
+  function generateCourtQueue(): Court[] {
+    const newCourtQueue = Scheduler.generateQueue(activePlayers, 5, sessionSettings);
+    setCourtQueue(newCourtQueue);
+    return newCourtQueue;
   }
 
   function handleScheduleCourts() {
-    const scheduledCourts = scheduleCourts();
-    fillEmptyCourts(scheduledCourts);
+    const generatedCourts = generateCourtQueue();
+    fillEmptyCourts(generatedCourts);
   }
 
   function handleGameFinished(i: number) {
@@ -211,7 +216,7 @@ export default function Home() {
       );
 
       // Rerun the algorithm and update the court queue
-      scheduleCourts();
+      generateCourtQueue();
     }
   }, [newGame]);
 
@@ -238,6 +243,12 @@ export default function Home() {
     )
 
     // TODO: add it here
+  }
+
+  function handleStartSession() {
+    clearCourts();
+    const generatedCourts = generateCourtQueue();
+    fillEmptyCourts(generatedCourts);
   }
 
   function printState() {
@@ -294,6 +305,12 @@ export default function Home() {
           <h2 className={`mb-3 text-2xl font-semibold`}>
             Active Players
           </h2>
+
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold px-3 rounded"
+            onClick={handleStartSession}>
+            Start Session
+          </button>
 
           {registeredPlayers.map((player, idx) =>
             <div key={idx}>
