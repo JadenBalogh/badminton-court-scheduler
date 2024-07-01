@@ -111,6 +111,7 @@ export default function Home() {
     let player: Player = {
       name: name,
       skillLevel: playerData ? playerData.skillLevel : 2,
+      isPlaying: false,
       lastPlayedTimestamp: Date.now(),
       lastPartneredTimestamp: {},
       lastScheduledEndTimestamp: 0
@@ -124,7 +125,25 @@ export default function Home() {
 
   // Starts a specified game at the given court index
   function startGame(index: number, court: Court) {
+    // Update the active court to the specified player list
+    setActiveCourts(prevActiveCourts =>
+      prevActiveCourts.map((activeCourt, i) => {
+        if (i === index) {
+          activeCourt.players = [...court.players];
+        }
+        return activeCourt;
+      })
+    );
 
+    // Set all game players to "playing" status
+    setActivePlayers(prevActivePlayers =>
+      prevActivePlayers.map(activePlayer => {
+        if (court.players.some((player) => player.name === activePlayer.name)) {
+          activePlayer.isPlaying = true;
+        }
+        return activePlayer;
+      })
+    );
   }
 
   function fillEmptyCourts(queue: Court[]) {

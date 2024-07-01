@@ -4,6 +4,7 @@ export type Player = {
   skillLevel: number;
 
   // Dynamic session variables
+  isPlaying: boolean;
   lastPlayedTimestamp: number; // Timestamp since the last game ended
   lastPartneredTimestamp: { [name: string]: number }; // Timestamp this player last finished playing with each other player
 
