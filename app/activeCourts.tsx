@@ -1,12 +1,13 @@
-import { Court } from '../types/types';
-import CourtDisplay from "./court";
+import { Court, Player } from '../types/types';
+import CourtDisplay from "./courtDisplay";
 
 type ActiveCourtsProps = {
   courts: Court[];
   handleCourtFinishesGame: (i: number) => void;
+  handleSkipPlayer: (player: Player) => void;
 }
 
-export default function ActiveCourts({ courts, handleCourtFinishesGame }: ActiveCourtsProps) {
+export default function ActiveCourts({ courts, handleCourtFinishesGame, handleSkipPlayer }: ActiveCourtsProps) {
   return (
     <div className="relative flex w-full justify-center gap-x-32">
       {
@@ -17,7 +18,7 @@ export default function ActiveCourts({ courts, handleCourtFinishesGame }: Active
               onClick={() => handleCourtFinishesGame(court.id)}>
                 Finish Game
             </button>
-            <CourtDisplay court={court} />
+            <CourtDisplay court={court} handleSkipPlayer={handleSkipPlayer} />
           </div>
         )
       }
