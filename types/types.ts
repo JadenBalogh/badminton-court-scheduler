@@ -31,5 +31,5 @@ export type SessionSettings = {
   maxDiversityScoreWaitTime: number;
   timeScoreWeight: number;
   diversityScoreWeight: number;
-  skillScoreWeight: number;
+  balanceScoreWeight: number;
 }

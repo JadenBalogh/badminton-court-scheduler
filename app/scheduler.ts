@@ -23,8 +23,8 @@ function calculateDiversityScore(player: Player, gameStartTime: number, otherPla
   return diversityScore / otherPlayers.length;
 }
 
-// Returns the normalized SKILL score for the given player. Skill variance more than maxSkillVariance beyond the target level = 0.0 skill score. Exact skill match = 1.0 skill score.
-function calculateSkillScore(player: Player, otherPlayers: Player[], settings: SessionSettings) {
+// Returns the normalized BALANCE score for the given player. Skill variance more than maxTeamSkillVariance beyond the target level = 0.0 skill score. Exact skill match = 1.0 skill score.
+function calculateBalanceScore(player: Player, otherPlayers: Player[], settings: SessionSettings) {
   if (otherPlayers.length < 2) {
     return 0; // Skill score can only be calculated when at least one player has been picked on each team.
   }
@@ -48,8 +48,8 @@ function calculateSkillScore(player: Player, otherPlayers: Player[], settings: S
 function calculateTotalScore(player: Player, gameStartTime: number, otherPlayers: Player[], settings: SessionSettings) {
   let timeScore = calculateTimeScore(player, gameStartTime, settings) * settings.timeScoreWeight;
   let diversityScore = calculateDiversityScore(player, gameStartTime, otherPlayers, settings) * settings.diversityScoreWeight;
-  let skillScore = calculateSkillScore(player, otherPlayers, settings) * settings.skillScoreWeight;
-  return timeScore + diversityScore + skillScore;
+  let balance = calculateBalanceScore(player, otherPlayers, settings) * settings.balanceScoreWeight;
+  return timeScore + diversityScore + balance;
 }
 
 // Returns the index of best matching player in the queue based on TIME, DIVERSITY and SKILL heuristics
@@ -63,9 +63,9 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
   }
 
   // Try to filter out any player that has a 0 skill score for this team (outside the allowed skill variance)
-  let skillFilterResults = candidates.filter(player => calculateSkillScore(player, selectedPlayers, settings) > 0);
-  if (skillFilterResults.length > 0) {
-    candidates = skillFilterResults; // Only apply the skill filter if any valid players are left
+  let balanceFilterResults = candidates.filter(player => calculateBalanceScore(player, selectedPlayers, settings) > 0);
+  if (balanceFilterResults.length > 0) {
+    candidates = balanceFilterResults; // Only apply the skill filter if any valid players are left
   }
 
   // Reduce the candidates down to the highest scoring player
@@ -80,7 +80,7 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
     console.log("Best player score breakdown:");
     console.log(" -> TIME: " + calculateTimeScore(bestPlayer, gameStartTime, settings) * settings.timeScoreWeight) + " (last scheduled end: " + bestPlayer.lastScheduledEndTimestamp + ")";
     console.log(" -> DIVERSITY: " + calculateDiversityScore(bestPlayer, gameStartTime, selectedPlayers, settings) * settings.diversityScoreWeight);
-    console.log(" -> SKILL: " + calculateSkillScore(bestPlayer, selectedPlayers, settings) * settings.skillScoreWeight);
+    console.log(" -> BALANCE: " + calculateBalanceScore(bestPlayer, selectedPlayers, settings) * settings.balanceScoreWeight);
     console.log(" -> Last Scheduled End: " + bestPlayer.lastScheduledEndTimestamp);
   }
 
@@ -173,7 +173,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
       console.log(team1Player2);
     }
 
-    // Step 2d: Assign next best player in queue to team 2 using TIME, DIVERSITY and SKILL heuristics
+    // Step 2d: Assign next best player in queue to team 2 using TIME, DIVERSITY and BALANCE heuristics
     if (ADVANCED_DEBUG_LOGGING) {
       console.log("***");
       console.log("Picking Team 2, Player 2...");
