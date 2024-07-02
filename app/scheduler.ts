@@ -25,27 +25,23 @@ function calculateDiversityScore(player: Player, gameStartTime: number, otherPla
 
 // Returns the normalized SKILL score for the given player. Skill variance more than maxSkillVariance beyond the target level = 0.0 skill score. Exact skill match = 1.0 skill score.
 function calculateSkillScore(player: Player, otherPlayers: Player[], settings: SessionSettings) {
-  let targetSkillLevel;
-  let maxSkillVariance;
+  if (otherPlayers.length < 2) {
+    return 0; // Skill score can only be calculated when at least one player has been picked on each team.
+  }
 
-  if (otherPlayers.length === 1) {
-    // When finding the 1st team 2 player, aim to find one with the same skill level as the 1st team 1 player, using individual variance
-    targetSkillLevel = otherPlayers[0].skillLevel;
-    maxSkillVariance = settings.maxIndividualSkillVariance;
-  } else if (otherPlayers.length === 2) {
-    // When finding the 2nd team 1 player, aim to find one with the same skill level as the 1st team 2 player, using team variance
+  let targetSkillLevel;
+  if (otherPlayers.length === 2) {
+    // When finding the 2nd team 1 player, aim to find one with the same skill level as the 1st team 2 player
     targetSkillLevel = otherPlayers[1].skillLevel;
-    maxSkillVariance = settings.maxTeamSkillVariance;
   } else {
-    // When finding the 2nd team 2 player, aim to perfectly balance the team skill levels, using team variance
+    // When finding the 2nd team 2 player, aim to perfectly balance the team skill levels
     let team1SkillLevel = otherPlayers[0].skillLevel + otherPlayers[2].skillLevel;
     let team2SkillLevel = otherPlayers[1].skillLevel;
     targetSkillLevel = team1SkillLevel - team2SkillLevel;
-    maxSkillVariance = settings.maxTeamSkillVariance;
   }
 
   let skillVariance = Math.abs(player.skillLevel - targetSkillLevel);
-  return 1 - Math.min(skillVariance / (maxSkillVariance + 1), 1);
+  return 1 - Math.min(skillVariance / (settings.maxTeamSkillVariance + 1), 1);
 }
 
 // Returns the weighted sum of the TIME, DIVERSITY and SKILL scores
