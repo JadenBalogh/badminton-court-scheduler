@@ -89,7 +89,7 @@ export default function Home() {
       for (let line of lines) {
         registeredPlayers.push(line.trim().toLowerCase());
       }
-      
+
       refreshState();
     }
   }, []);
@@ -146,60 +146,48 @@ export default function Home() {
 
   // Starts a specified game at the given court index
   function startGame(index: number, court: Court) {
-    // Update the active court to the specified player list
-    activeCourts[index].players = [...court.players];
+    activeCourts[index].players = court.players;
 
-    // Set all game players to "playing" status
     for (let player of activeCourts[index].players) {
       player.isPlaying = true;
     }
   }
 
-  function fillEmptyCourts(queue: Court[]) {
-    let courtIndex = 0;
-
-    for (let activeCourt of activeCourts) {
-      if (activeCourt.players.length === 0 && queue[courtIndex]) {
-        activeCourt.players = queue[courtIndex].players;
-        courtIndex++;
-      }
-    }
-
-    if (courtIndex > 0) {
-      courtQueue = courtQueue.slice(courtIndex);
-    }
-  }
-
-  function generateCourtQueue(): Court[] {
-    courtQueue = Scheduler.generateQueue(activePlayers, 5, sessionSettings);
-    return courtQueue;
-  }
-
-  function handleScheduleCourts() {
-    const generatedCourts = generateCourtQueue();
-    fillEmptyCourts(generatedCourts);
-    refreshState();
-  }
-
-  function handleGameFinished(i: number) {
-    console.log("Finishing game " + i + " at " + Date.now());
-
-    // Update players last played timestamps and last partnered timestamps
-    for (let player of activeCourts[i].players) {
+  function finishGame(index: number) {
+    for (let player of activeCourts[index].players) {
       player.isPlaying = false;
       player.lastPlayedTimestamp = Date.now();
-      activeCourts[i].players.filter(p => p.name !== player.name).forEach((p) => {
+      activeCourts[index].players.filter(p => p.name !== player.name).forEach((p) => {
         player.lastPartneredTimestamp[p.name] = Date.now();
       });
     }
-    console.log("Updated players last played timestamps and last partnered timestamps");
 
-    // Remove players from court
-    activeCourts[i].players = [];
-    console.log("Removed players from court " + i);
+    activeCourts[index].players = [];
+  }
 
-    // Pop next game from court queue and set it as the new game
-    startGame(i, courtQueue[0]);
+  function fillEmptyCourts() {
+    for (let i = 0; i < activeCourts.length; i++) {
+      if (activeCourts[i].players.length === 0 && courtQueue[i]) {
+        startGame(i, courtQueue[i]);
+      }
+    }
+  }
+
+  function generateCourtQueue() {
+    courtQueue = Scheduler.generateQueue(activePlayers, 20, sessionSettings);
+  }
+
+  function handleStartSession() {
+    clearCourts();
+    generateCourtQueue();
+    fillEmptyCourts();
+    generateCourtQueue();
+    refreshState();
+  }
+
+  function handleGameFinished(index: number) {
+    finishGame(index);
+    startGame(index, courtQueue[0]);
     refreshState();
   }
 
@@ -226,13 +214,6 @@ export default function Home() {
     // )
 
     // TODO: add it here
-  }
-
-  function handleStartSession() {
-    clearCourts();
-    const generatedCourts = generateCourtQueue();
-    fillEmptyCourts(generatedCourts);
-    refreshState();
   }
 
   function printState() {
@@ -267,10 +248,6 @@ export default function Home() {
 
         <button onClick={handleCheckAllPlayers}>
           Check and uncheck all players!
-        </button>
-
-        <button onClick={handleScheduleCourts}>
-          Run the scheduling algorithm to fill the active courts!
         </button>
 
         <button onClick={clearCourts}>

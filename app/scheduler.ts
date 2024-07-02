@@ -4,6 +4,10 @@ const ADVANCED_DEBUG_LOGGING = false; // Enable advanced logging
 
 // Returns the normalized TIME score for the given player. 0 minute wait = 0.0 time score. 30 minute wait = 1.0 time score.
 function calculateTimeScore(player: Player, gameStartTime: number, settings: SessionSettings) {
+  if (player.isPlaying) {
+    return 0;
+  }
+
   let waitTime = gameStartTime - player.lastScheduledEndTimestamp;
   return Math.min(waitTime, settings.maxTimeScoreWaitTime) / settings.maxTimeScoreWaitTime;
 }
@@ -102,7 +106,13 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
 
   // Step 1: Sort players by time played (longest wait first)
   let playerQueue: Player[] = [...players];
-  playerQueue.sort((a, b) => a.lastPlayedTimestamp - b.lastPlayedTimestamp);
+  playerQueue.sort((a, b) => {
+    if (a.isPlaying !== b.isPlaying) {
+      return +a.isPlaying - +b.isPlaying;
+    } else {
+      return a.lastPlayedTimestamp - b.lastPlayedTimestamp
+    }
+  });
 
   console.log("Computed time-based player queue:");
   console.log([...playerQueue]);
