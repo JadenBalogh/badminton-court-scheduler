@@ -16,6 +16,7 @@ const MAX_DIVERSITY_SCORE_PLAY_DELAY = 3600000; // 1 hour in milliseconds
 const TIME_SCORE_WEIGHT = 1;
 const DIVERSITY_SCORE_WEIGHT = 1;
 const BALANCE_SCORE_WEIGHT = 1;
+const SKILL_SCORE_WEIGHT = 1;
 
 let playerDatas: PlayerData[] = [];
 let registeredPlayers: string[] = [];
@@ -34,6 +35,7 @@ export default function Home() {
     timeScoreWeight: TIME_SCORE_WEIGHT,
     diversityScoreWeight: DIVERSITY_SCORE_WEIGHT,
     balanceScoreWeight: BALANCE_SCORE_WEIGHT,
+    skillScoreWeight: SKILL_SCORE_WEIGHT,
   });
 
   const [playerDatasState, setPlayerDatasState] = useState<PlayerData[]>([]); // Skill level data for all players in database (text file for now)
@@ -132,7 +134,7 @@ export default function Home() {
       name: name,
       skillLevel: playerData ? playerData.skillLevel : 2,
       isPlaying: false,
-      lastPlayedTimestamp: Date.now(),
+      lastPlayedTimestamp: 0,
       lastPartneredTimestamp: {},
       lastScheduledEndTimestamp: 0
     };

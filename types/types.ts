@@ -32,4 +32,5 @@ export type SessionSettings = {
   timeScoreWeight: number;
   diversityScoreWeight: number;
   balanceScoreWeight: number;
+  skillScoreWeight: number;
 }
