@@ -71,7 +71,7 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
 
   if (ADVANCED_DEBUG_LOGGING) {
     console.log("Evaluating candidates:")
-    console.log([...candidates]);
+    console.log(structuredClone(candidates));
   }
 
   // Try to filter out any player that has a 0 balance AND skill score for this team (i.e. outside the allowed skill variances)
@@ -124,7 +124,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
   });
 
   console.log("Computed time-based player queue:");
-  console.log([...playerQueue]);
+  console.log(structuredClone(playerQueue));
 
   // Step 2: Perform greedy algorithm to select players to add to the next court
   let scheduledGameTime = Date.now();
@@ -157,7 +157,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
     schedulePlayer(playerQueue, team1Player1, scheduledGameTime, settings);
 
     if (ADVANCED_DEBUG_LOGGING) {
-      console.log(team1Player1);
+      console.log(structuredClone(team1Player1));
     }
 
     // Step 2b: Assign next best player in queue to team 2 using TIME and DIVERSITY heuristics
@@ -170,7 +170,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
     schedulePlayer(playerQueue, team2Player1, scheduledGameTime, settings);
 
     if (ADVANCED_DEBUG_LOGGING) {
-      console.log(team2Player1);
+      console.log(structuredClone(team2Player1));
     }
 
     // Step 2c: Assign next best player in queue to team 1 using TIME and DIVERSITY heuristics
@@ -183,7 +183,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
     schedulePlayer(playerQueue, team1Player2, scheduledGameTime, settings);
 
     if (ADVANCED_DEBUG_LOGGING) {
-      console.log(team1Player2);
+      console.log(structuredClone(team1Player2));
     }
 
     // Step 2d: Assign next best player in queue to team 2 using TIME, DIVERSITY and BALANCE heuristics
@@ -196,7 +196,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
     schedulePlayer(playerQueue, team2Player2, scheduledGameTime, settings);
 
     if (ADVANCED_DEBUG_LOGGING) {
-      console.log(team2Player2);
+      console.log(structuredClone(team2Player2));
     }
 
     court.players = [team1Player1, team1Player2, team2Player1, team2Player2];
@@ -204,7 +204,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
   }
 
   console.log("Generated court queue:");
-  console.log(result);
+  console.log(structuredClone(result));
 
   return result;
 }
