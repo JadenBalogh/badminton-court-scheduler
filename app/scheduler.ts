@@ -44,7 +44,7 @@ function calculateBalanceScore(player: Player, otherPlayers: Player[], settings:
   return 1 - Math.min(skillVariance / (settings.maxTeamSkillVariance + 1), 1);
 }
 
-// Returns the weighted sum of the TIME, DIVERSITY and SKILL scores
+// Returns the weighted sum of the TIME, DIVERSITY and BALANCE scores
 function calculateTotalScore(player: Player, gameStartTime: number, otherPlayers: Player[], settings: SessionSettings) {
   let timeScore = calculateTimeScore(player, gameStartTime, settings) * settings.timeScoreWeight;
   let diversityScore = calculateDiversityScore(player, gameStartTime, otherPlayers, settings) * settings.diversityScoreWeight;
@@ -52,7 +52,7 @@ function calculateTotalScore(player: Player, gameStartTime: number, otherPlayers
   return timeScore + diversityScore + balance;
 }
 
-// Returns the index of best matching player in the queue based on TIME, DIVERSITY and SKILL heuristics
+// Returns the index of best matching player in the queue based on TIME, DIVERSITY and BALANCE heuristics
 function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selectedPlayers: Player[], settings: SessionSettings) {
   // Consider only players that haven't already been selected as part of this team
   let candidates = playerQueue.slice(0, playerQueue.length - selectedPlayers.length);
@@ -62,10 +62,10 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
     console.log([...candidates]);
   }
 
-  // Try to filter out any player that has a 0 skill score for this team (outside the allowed skill variance)
+  // Try to filter out any player that has a 0 balance score for this team (outside the allowed team skill variance)
   let balanceFilterResults = candidates.filter(player => calculateBalanceScore(player, selectedPlayers, settings) > 0);
   if (balanceFilterResults.length > 0) {
-    candidates = balanceFilterResults; // Only apply the skill filter if any valid players are left
+    candidates = balanceFilterResults; // Only apply the balance filter if any valid players are left
   }
 
   // Reduce the candidates down to the highest scoring player
