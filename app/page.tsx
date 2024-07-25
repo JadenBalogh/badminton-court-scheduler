@@ -190,6 +190,7 @@ export default function Home() {
   function handleGameFinished(index: number) {
     finishGame(index);
     startGame(index, courtQueue[0]);
+    generateCourtQueue();
     refreshState();
   }
 
