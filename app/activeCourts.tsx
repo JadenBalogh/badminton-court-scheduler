@@ -9,16 +9,16 @@ type ActiveCourtsProps = {
 
 export default function ActiveCourts({ courts, handleGameFinished, handleSkipPlayer }: ActiveCourtsProps) {
   return (
-    <div className="relative flex w-full justify-center gap-x-32">
+    <div className="flex w-full justify-center gap-x-32">
       {
         courts.map((court) =>
-          <div key={court.id}>
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold px-3 rounded"
-              onClick={() => handleGameFinished(court.id)}>
-                Finish Game
-            </button>
+          <div className="flex flex-col w-80 items-center gap-y-6" key={court.id}>
             <CourtDisplay court={court} handleSkipPlayer={handleSkipPlayer} />
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-32 h-12 rounded"
+              onClick={() => handleGameFinished(court.id)}>
+              Finish Game
+            </button>
           </div>
         )
       }

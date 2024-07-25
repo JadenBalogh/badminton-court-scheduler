@@ -243,7 +243,15 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-between gap-y-8 p-24">
+      <h1 className="mb-3 text-3xl font-semibold">Active Courts</h1>
+
+      <ActiveCourts
+        courts={activeCourtsState}
+        handleGameFinished={handleGameFinished}
+        handleSkipPlayer={handleSkipPlayer}
+      />
+
       <div className="flex flex-col">
         <button onClick={printState}>
           Print the current state!
@@ -258,14 +266,8 @@ export default function Home() {
         </button>
       </div>
 
-      <ActiveCourts
-        courts={activeCourtsState}
-        handleGameFinished={handleGameFinished}
-        handleSkipPlayer={handleSkipPlayer}
-      />
-
       <div className="flex gap-2">
-        <div className="flex flex-col py-12">
+        <div className="flex flex-col">
           <h2 className={`mb-3 text-2xl font-semibold`}>
             Active Players
           </h2>
@@ -289,7 +291,7 @@ export default function Home() {
           )}
         </div>
 
-        <div className="flex flex-col py-12">
+        <div className="flex flex-col">
           <h2 className={`mb-3 text-2xl font-semibold`}>
             Next Games
           </h2>

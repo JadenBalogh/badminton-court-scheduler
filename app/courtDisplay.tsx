@@ -9,26 +9,12 @@ type CourtProps = {
 
 export default function CourtDisplay({ court, handleSkipPlayer }: CourtProps) {
   return (
-    <div className="relative text-center">
-      <Image
-        src="/badminton-court.png"
-        alt="Badminton Court"
-        width={218}
-        height={400}
-        priority
-      />
-      <div className="w-full absolute top-0 left-0 text-center py-6">
-        <div className="flex flex-col h-80 items-center justify-between">
-          <div className="flex w-full items-center justify-evenly">
-            <CourtPlayer player={court.players[0]} handleSkipPlayer={handleSkipPlayer} />
-            <CourtPlayer player={court.players[1]} handleSkipPlayer={handleSkipPlayer} />
-          </div>
-          <div className="flex w-full items-center justify-evenly">
-            <CourtPlayer player={court.players[2]} handleSkipPlayer={handleSkipPlayer} />
-            <CourtPlayer player={court.players[3]} handleSkipPlayer={handleSkipPlayer} />
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col items-center w-64 p-4 bg-neutral-300 rounded">
+      <CourtPlayer player={court.players[0]} handleSkipPlayer={handleSkipPlayer} />
+      <CourtPlayer player={court.players[1]} handleSkipPlayer={handleSkipPlayer} />
+      <p className="py-2">vs.</p>
+      <CourtPlayer player={court.players[2]} handleSkipPlayer={handleSkipPlayer} />
+      <CourtPlayer player={court.players[3]} handleSkipPlayer={handleSkipPlayer} />
     </div>
   );
 }
