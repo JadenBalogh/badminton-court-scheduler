@@ -48,11 +48,11 @@ export default function Home() {
   const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   function refreshState() {
-    setPlayerDatasState(playerDatas);
-    setRegisteredPlayersState(registeredPlayers);
-    setActivePlayersState(activePlayers);
-    setActiveCourtsState(activeCourts);
-    setCourtQueueState(courtQueue);
+    setPlayerDatasState([...playerDatas]);
+    setRegisteredPlayersState([...registeredPlayers]);
+    setActivePlayersState([...activePlayers]);
+    setActiveCourtsState([...activeCourts]);
+    setCourtQueueState([...courtQueue]);
   }
 
   // Load player data, load registered players and initialize empty courts
