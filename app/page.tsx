@@ -243,7 +243,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between gap-y-8 p-24">
+    <main className="flex min-h-screen flex-col items-center justify-between gap-y-8 py-24">
       <h1 className="mb-3 text-3xl font-semibold">Active Courts</h1>
 
       <ActiveCourts

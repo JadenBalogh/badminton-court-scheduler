@@ -9,7 +9,7 @@ type ActiveCourtsProps = {
 
 export default function ActiveCourts({ courts, handleGameFinished, handleSkipPlayer }: ActiveCourtsProps) {
   return (
-    <div className="flex w-full justify-center gap-x-32">
+    <div className="flex flex-wrap w-full justify-center gap-y-8">
       {
         courts.map((court) =>
           <div className="flex flex-col w-80 items-center gap-y-6" key={court.id}>
