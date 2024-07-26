@@ -96,18 +96,6 @@ export default function Home() {
     }
   }, []);
 
-  function clearCourts() {
-    let emptyCourts: Court[] = [];
-    for (let i = 0; i < sessionSettings.courtCount; i++) {
-      emptyCourts.push({
-        id: i,
-        players: []
-      });
-    }
-    activeCourts = [...emptyCourts];
-    refreshState();
-  }
-
   function getPlayerData(name: string) {
     return playerDatas.find(data => data.name == name);
   }
@@ -144,6 +132,18 @@ export default function Home() {
 
   function removeActivePlayer(name: string) {
     activePlayers = activePlayers.filter(player => player.name != name);
+  }
+
+  function clearCourts() {
+    let emptyCourts: Court[] = [];
+    for (let i = 0; i < sessionSettings.courtCount; i++) {
+      emptyCourts.push({
+        id: i,
+        players: []
+      });
+    }
+    activeCourts = [...emptyCourts];
+    refreshState();
   }
 
   // Starts a specified game at the given court index
