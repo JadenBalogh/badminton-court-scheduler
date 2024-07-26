@@ -134,6 +134,15 @@ export default function Home() {
     activePlayers = activePlayers.filter(player => player.name != name);
   }
 
+  function resetPlayers() {
+    for (let player of activePlayers) {
+      player.isPlaying = false;
+      player.lastPlayedTimestamp = 0;
+      player.lastPartneredTimestamp = {};
+      player.lastScheduledEndTimestamp = 0;
+    }
+  }
+
   function clearCourts() {
     let emptyCourts: Court[] = [];
     for (let i = 0; i < sessionSettings.courtCount; i++) {
@@ -180,6 +189,7 @@ export default function Home() {
   }
 
   function handleStartSession() {
+    resetPlayers();
     clearCourts();
     generateCourtQueue();
     fillEmptyCourts();
