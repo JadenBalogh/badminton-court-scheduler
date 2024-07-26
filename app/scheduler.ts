@@ -133,7 +133,8 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
   for (let i = 0; i < queueLength; i++) {
     let court: Court = {
       id: i,
-      players: []
+      players: [],
+      estimatedStartTime: 0
     };
 
     if (i > 0 && i % settings.courtCount === 0) {
@@ -200,6 +201,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
     }
 
     court.players = [team1Player1, team1Player2, team2Player1, team2Player2];
+    court.estimatedStartTime = scheduledGameTime;
     result.push(court);
   }
 

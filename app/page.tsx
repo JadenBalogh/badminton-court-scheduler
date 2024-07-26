@@ -142,6 +142,12 @@ export default function Home() {
     activePlayers = activePlayers.filter(player => player.username != username);
   }
 
+  function getStartDelay(court: Court) {
+    let startDelayMS = court.estimatedStartTime - Date.now();
+    let startDelayMins = startDelayMS / 1000 / 60; // Convert ms to mins
+    return Math.round(startDelayMins);
+  }
+
   function resetPlayers() {
     for (let player of activePlayers) {
       player.isPlaying = false;
@@ -156,7 +162,8 @@ export default function Home() {
     for (let i = 0; i < sessionSettings.courtCount; i++) {
       emptyCourts.push({
         id: i,
-        players: []
+        players: [],
+        estimatedStartTime: 0
       });
     }
     activeCourts = [...emptyCourts];
@@ -284,7 +291,7 @@ export default function Home() {
                 court={court}
                 handleSkipPlayer={() => { }}
               />
-              <p className="text-sm">Starts in ~4 mins.</p>
+              <p className="text-sm">Starts in ~{getStartDelay(court)} mins.</p>
             </div>
           )}
         </div>
