@@ -261,7 +261,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between gap-y-8 py-24">
+    <main className="flex min-h-screen flex-col items-center justify-between gap-y-8 py-16">
       <h2 className="mb-3 text-3xl font-semibold">
         Active Courts
       </h2>
@@ -284,7 +284,7 @@ export default function Home() {
                 court={court}
                 handleSkipPlayer={() => { }}
               />
-              <p>Starts in ~4 mins</p>
+              <p className="text-sm">Starts in ~4 mins.</p>
             </div>
           )}
         </div>
