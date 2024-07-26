@@ -257,44 +257,49 @@ export default function Home() {
           Print the current state!
         </button>
 
-        <button onClick={handleCheckAllPlayers}>
-          Check and uncheck all players!
-        </button>
 
         <button onClick={clearCourts}>
           Clear all courts!
         </button>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-4">
         <div className="flex flex-col">
           <h2 className={`mb-3 text-2xl font-semibold`}>
             Active Players
           </h2>
 
           <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold px-3 rounded"
-            onClick={handleStartSession}>
-            Start Session
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-40 p-3 rounded"
+            onClick={handleCheckAllPlayers}>
+            Toggle All
           </button>
 
-          {registeredPlayersState.map((player, idx) =>
-            <div key={idx}>
-              <input
-                type="checkbox"
-                value={player}
-                onChange={(event) => onPlayerChecked(event)}
-                ref={el => checkboxRefs.current[idx] = el}
-              />
-              {player}
-            </div>
-          )}
+          <div className="my-4">
+            {registeredPlayersState.map((player, idx) =>
+              <div key={idx}>
+                <input
+                  type="checkbox"
+                  value={player}
+                  onChange={(event) => onPlayerChecked(event)}
+                  ref={el => checkboxRefs.current[idx] = el}
+                />
+                {' '}{player}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col">
           <h2 className={`mb-3 text-2xl font-semibold`}>
             Next Games
           </h2>
+
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-40 p-3 rounded"
+            onClick={handleStartSession}>
+            Start Session
+          </button>
 
           {courtQueueState.map((game, i) =>
             <div key={i}>
