@@ -71,7 +71,7 @@ export default function Home() {
       for (let line of lines) {
         let fields = line.split(',');
         let player: PlayerData = {
-          name: fields[0].trim().toLowerCase(),
+          username: toUsername(fields[0]),
           skillLevel: Number(fields[1])
         };
 
@@ -89,15 +89,19 @@ export default function Home() {
       let lines = text.split(/[\r\n]+/);
 
       for (let line of lines) {
-        registeredPlayers.push(line.trim().toLowerCase());
+        registeredPlayers.push(line.trim());
       }
 
       refreshState();
     }
   }, []);
 
-  function getPlayerData(name: string) {
-    return playerDatas.find(data => data.name == name);
+  function toUsername(name: string) {
+    return name.trim().replace(/\s/g, '').toLowerCase();
+  }
+
+  function getPlayerData(username: string) {
+    return playerDatas.find(data => data.username == username);
   }
 
   function onPlayerChecked(event: ChangeEvent<HTMLInputElement>) {
@@ -111,15 +115,17 @@ export default function Home() {
   }
 
   function addActivePlayer(name: string) {
-    let playerData = getPlayerData(name);
+    let username = toUsername(name);
+    let playerData = getPlayerData(username);
 
     if (playerData === undefined) {
-      console.log("Failed to find player by name: " + name);
+      console.log("Failed to find player by name: " + username);
       return;
     }
 
     let player: Player = {
       name: name,
+      username: username,
       skillLevel: playerData ? playerData.skillLevel : 2,
       isPlaying: false,
       lastPlayedTimestamp: 0,
@@ -131,7 +137,8 @@ export default function Home() {
   }
 
   function removeActivePlayer(name: string) {
-    activePlayers = activePlayers.filter(player => player.name != name);
+    let username = toUsername(name);
+    activePlayers = activePlayers.filter(player => player.username != username);
   }
 
   function resetPlayers() {
@@ -168,8 +175,8 @@ export default function Home() {
     for (let player of activeCourts[index].players) {
       player.isPlaying = false;
       player.lastPlayedTimestamp = Date.now();
-      activeCourts[index].players.filter(p => p.name !== player.name).forEach((p) => {
-        player.lastPartneredTimestamp[p.name] = Date.now();
+      activeCourts[index].players.filter(p => p.username !== player.username).forEach((p) => {
+        player.lastPartneredTimestamp[p.username] = Date.now();
       });
     }
 
