@@ -2,6 +2,7 @@
 
 import { Player, Court, SessionSettings, PlayerData } from '../types/types'
 import ActiveCourts from './activeCourts';
+import CourtDisplay from './courtDisplay';
 import { Scheduler } from './scheduler';
 import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 
@@ -261,7 +262,9 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between gap-y-8 py-24">
-      <h1 className="mb-3 text-3xl font-semibold">Active Courts</h1>
+      <h2 className="mb-3 text-3xl font-semibold">
+        Active Courts
+      </h2>
 
       <ActiveCourts
         courts={activeCourtsState}
@@ -269,22 +272,35 @@ export default function Home() {
         handleSkipPlayer={handleSkipPlayer}
       />
 
-      <div className="flex flex-col">
-        <button onClick={printState}>
-          Print the current state!
-        </button>
+      <div className="flex flex-col w-4/5 my-8">
+        <h2 className={`mb-3 text-2xl font-semibold`}>
+          Upcoming Games
+        </h2>
 
-
-        <button onClick={clearCourts}>
-          Clear all courts!
-        </button>
+        <div className="flex py-4 gap-x-4 w-full overflow-x-auto">
+          {courtQueueState.map((court, i) =>
+            <div className="flex flex-col w-80 items-center gap-y-2" key={i}>
+              <CourtDisplay
+                court={court}
+                handleSkipPlayer={() => { }}
+              />
+              <p>Starts in ~4 mins</p>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-4">
-        <div className="flex flex-col">
-          <h2 className={`mb-3 text-2xl font-semibold`}>
+        <div className="flex flex-col gap-y-2">
+          <h2 className={`text-2xl font-semibold`}>
             Active Players
           </h2>
+
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-40 p-3 rounded"
+            onClick={handleStartSession}>
+            Start Session
+          </button>
 
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-40 p-3 rounded"
@@ -292,7 +308,7 @@ export default function Home() {
             Toggle All
           </button>
 
-          <div className="my-4">
+          <div>
             {registeredPlayersState.map((player, idx) =>
               <div key={idx}>
                 <input
@@ -308,24 +324,13 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col">
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Next Games
-          </h2>
-
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-40 p-3 rounded"
-            onClick={handleStartSession}>
-            Start Session
+          <button onClick={printState}>
+            Print the current state!
           </button>
 
-          {courtQueueState.map((game, i) =>
-            <div key={i}>
-              <p>{game.players[0].name} + {game.players[1].name}</p>
-              <p>vs</p>
-              <p>{game.players[2].name} + {game.players[3].name}</p>
-              <p>--------------------</p>
-            </div>
-          )}
+          <button onClick={clearCourts}>
+            Clear all courts!
+          </button>
         </div>
       </div>
     </main>
