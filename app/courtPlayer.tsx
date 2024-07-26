@@ -9,7 +9,8 @@ type CourtPlayerProps = {
 export default function CourtPlayer({ player, handleSkipPlayer }: CourtPlayerProps) {
   return (
     <div className="flex items-center justify-between">
-      <div className="text-center max-w-64 w-full">
+      <div className="text-center max-w-64 w-full"
+        onClick={() => handleSkipPlayer(player)}>
         <p className="text-lg truncate">
           {player ? player.name : "(empty)"}
         </p>
