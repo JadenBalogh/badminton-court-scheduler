@@ -200,7 +200,7 @@ export default function Home() {
   }
 
   function generateCourtQueue() {
-    courtQueue = Scheduler.generateQueue(activePlayers, 20, sessionSettings);
+    courtQueue = Scheduler.generateQueue(activePlayers, 10, sessionSettings);
   }
 
   function handleStartSession() {
