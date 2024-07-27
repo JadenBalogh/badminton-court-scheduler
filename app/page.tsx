@@ -10,7 +10,7 @@ const COURT_COUNT = 3;
 const MAX_TEAM_SKILL_VARIANCE = 0;
 const MAX_INDIVIDUAL_SKILL_VARIANCE = 2;
 
-const EXPECTED_GAME_DURATION = 480000; // 8 minutes in milliseconds
+const EXPECTED_GAME_DURATION = 15000; // 8 minutes in milliseconds
 const MAX_TIME_SCORE_WAIT_TIME = 1800000; // 30 minutes in milliseconds
 const MAX_DIVERSITY_SCORE_PLAY_DELAY = 3600000; // 1 hour in milliseconds
 
@@ -97,6 +97,16 @@ export default function Home() {
     }
   }, []);
 
+  // Refresh state every 30 seconds. Ensures timers are always reasonably up to date.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshState();
+      console.log("State refreshed.");
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   function toUsername(name: string) {
     return name.trim().replace(/\s/g, '').toLowerCase();
   }
@@ -143,7 +153,7 @@ export default function Home() {
   }
 
   function getStartDelay(court: Court) {
-    let startDelayMS = court.estimatedStartTime - Date.now();
+    let startDelayMS = court.startTime - Date.now();
     let startDelayMins = startDelayMS / 1000 / 60; // Convert ms to mins
     return Math.round(startDelayMins);
   }
@@ -163,7 +173,7 @@ export default function Home() {
       emptyCourts.push({
         id: i,
         players: [],
-        estimatedStartTime: 0
+        startTime: 0
       });
     }
     activeCourts = [...emptyCourts];
@@ -172,6 +182,7 @@ export default function Home() {
 
   // Starts a specified game at the given court index
   function startGame(index: number, court: Court) {
+    activeCourts[index].startTime = Date.now();
     activeCourts[index].players = court.players;
 
     for (let player of activeCourts[index].players) {
@@ -200,7 +211,7 @@ export default function Home() {
   }
 
   function generateCourtQueue() {
-    courtQueue = Scheduler.generateQueue(activePlayers, 10, sessionSettings);
+    courtQueue = Scheduler.generateQueue(activePlayers, activeCourts, 40, sessionSettings);
   }
 
   function handleStartSession() {
@@ -214,7 +225,7 @@ export default function Home() {
 
   function handleGameFinished(index: number) {
     finishGame(index);
-    startGame(index, courtQueue[0]);
+    startGame(index, courtQueue[0]); // TODO: Highlight the started court tile for 20 seconds
     generateCourtQueue();
     refreshState();
   }
@@ -291,7 +302,7 @@ export default function Home() {
                 court={court}
                 handleSkipPlayer={() => { }}
               />
-              <p className="text-sm">Starts in ~{getStartDelay(court)} mins.</p>
+              <p className="text-sm">Starts in ~{getStartDelay(court)} mins.</p> {/* TODO: Conditional text for <=0 case */}
             </div>
           )}
         </div>

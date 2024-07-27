@@ -1,3 +1,4 @@
+import { start } from 'repl';
 import { Player, Court, SessionSettings } from '../types/types'
 
 const ADVANCED_DEBUG_LOGGING = false; // Enable advanced logging
@@ -108,7 +109,7 @@ function schedulePlayer(playerQueue: Player[], player: Player, gameStartTime: nu
   player.lastScheduledEndTimestamp = gameStartTime + settings.expectedGameDuration;
 }
 
-function generateQueue(players: Player[], queueLength: number, settings: SessionSettings) {
+function generateQueue(players: Player[], courts: Court[], queueLength: number, settings: SessionSettings) {
   console.log("Generating court queue...");
 
   let result: Court[] = []; // Generated queue of courts
@@ -126,20 +127,35 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
   console.log("Computed time-based player queue:");
   console.log(structuredClone(playerQueue));
 
-  // Step 2: Perform greedy algorithm to select players to add to the next court
+  // Step 2: Calculate estimated start times based on the current active court estimated times remaining
+  let courtQueue: Court[] = [...courts];
+  courtQueue.sort((a, b) => {
+    return a.startTime - b.startTime;
+  });
+  let startOffsets = courtQueue.map(court => {
+    let playedDuration = Date.now() - court.startTime;
+    return settings.expectedGameDuration - playedDuration;
+  });
+
+  console.log("Computed estimated times remaining per active court:");
+  console.log(structuredClone(startOffsets));
+
   let scheduledGameTime = Date.now();
   playerQueue.forEach(player => player.lastScheduledEndTimestamp = player.lastPlayedTimestamp);
 
+  // Step 3: Perform greedy algorithm to select players to add to the next court
   for (let i = 0; i < queueLength; i++) {
+    let courtIndex = i % settings.courtCount;
+
+    if (i > 0 && courtIndex === 0) {
+      scheduledGameTime += settings.expectedGameDuration;
+    }
+
     let court: Court = {
       id: i,
       players: [],
-      estimatedStartTime: 0
+      startTime: scheduledGameTime + startOffsets[courtIndex]
     };
-
-    if (i > 0 && i % settings.courtCount === 0) {
-      scheduledGameTime += settings.expectedGameDuration;
-    }
 
     if (ADVANCED_DEBUG_LOGGING) {
       console.log("*****");
@@ -148,7 +164,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
       console.log("Scheduling Court " + i + " at time " + scheduledGameTime + "...");
     }
 
-    // Step 2a: Assign first player in queue to team 1
+    // Step 3a: Assign first player in queue to team 1
     if (ADVANCED_DEBUG_LOGGING) {
       console.log("***");
       console.log("Picking Team 1, Player 1...");
@@ -161,7 +177,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
       console.log(structuredClone(team1Player1));
     }
 
-    // Step 2b: Assign next best player in queue to team 2 using TIME and DIVERSITY heuristics
+    // Step 3b: Assign next best player in queue to team 2 using TIME and DIVERSITY heuristics
     if (ADVANCED_DEBUG_LOGGING) {
       console.log("***");
       console.log("Picking Team 2, Player 1...");
@@ -174,7 +190,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
       console.log(structuredClone(team2Player1));
     }
 
-    // Step 2c: Assign next best player in queue to team 1 using TIME and DIVERSITY heuristics
+    // Step 3c: Assign next best player in queue to team 1 using TIME and DIVERSITY heuristics
     if (ADVANCED_DEBUG_LOGGING) {
       console.log("***");
       console.log("Picking Team 1, Player 2...");
@@ -187,7 +203,7 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
       console.log(structuredClone(team1Player2));
     }
 
-    // Step 2d: Assign next best player in queue to team 2 using TIME, DIVERSITY and BALANCE heuristics
+    // Step 3d: Assign next best player in queue to team 2 using TIME, DIVERSITY and BALANCE heuristics
     if (ADVANCED_DEBUG_LOGGING) {
       console.log("***");
       console.log("Picking Team 2, Player 2...");
@@ -201,7 +217,6 @@ function generateQueue(players: Player[], queueLength: number, settings: Session
     }
 
     court.players = [team1Player1, team1Player2, team2Player1, team2Player2];
-    court.estimatedStartTime = scheduledGameTime;
     result.push(court);
   }
 

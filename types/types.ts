@@ -21,7 +21,7 @@ export type PlayerData = {
 export type Court = {
   id: number;
   players: Player[];
-  estimatedStartTime: number;
+  startTime: number;
 }
 
 export type SessionSettings = {
