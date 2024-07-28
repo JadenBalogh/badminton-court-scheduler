@@ -158,6 +158,13 @@ export default function Home() {
     return Math.round(startDelayMins);
   }
 
+  function getWaitTimeText(court: Court) {
+    let waitTime = getStartDelay(court);
+    let minsText = waitTime === 1 ? "min" : "mins";
+    let waitTimeText = waitTime <= 0 ? "soon!" : "in ~" + waitTime + " " + minsText + ".";
+    return "Starting " + waitTimeText;
+  }
+
   function resetPlayers() {
     for (let player of activePlayers) {
       player.isPlaying = false;
@@ -302,7 +309,7 @@ export default function Home() {
                 court={court}
                 handleSkipPlayer={() => { }}
               />
-              <p className="text-sm">Starts in ~{getStartDelay(court)} mins.</p> {/* TODO: Conditional text for <=0 case */}
+              <p className="text-sm">{getWaitTimeText(court)}</p>
             </div>
           )}
         </div>
