@@ -9,7 +9,7 @@ type CourtProps = {
 
 export default function CourtDisplay({ court, handleSkipPlayer }: CourtProps) {
   return (
-    <div className="flex flex-col items-center w-64 p-4 bg-neutral-300 rounded">
+    <div className="flex flex-col items-center w-64 p-4 bg-gradient-to-b from-neutral-300 to-zinc-300 rounded">
       <CourtPlayer player={court.players[0]} handleSkipPlayer={handleSkipPlayer} />
       <CourtPlayer player={court.players[1]} handleSkipPlayer={handleSkipPlayer} />
       <p className="py-2 text-sm">vs.</p>
