@@ -258,6 +258,11 @@ export default function Home() {
     courtQueue = Scheduler.generateQueue(players, activeCourts, 40, sessionSettings);
   }
 
+  function getNextCourt() {
+    let players = activePlayers.filter(p => p.isEnabled);
+    return Scheduler.getNextCourt(courtQueue, players, sessionSettings);
+  }
+
   function handleStartSession() {
     resetPlayers();
     clearCourts();
@@ -269,7 +274,7 @@ export default function Home() {
 
   function handleGameFinished(index: number) {
     finishGame(index);
-    startGame(index, courtQueue[0]); // TODO: Highlight the started court tile for 20 seconds
+    startGame(index, getNextCourt()); // TODO: Highlight the started court tile for 20 seconds
     generateCourtQueue();
     refreshState();
   }

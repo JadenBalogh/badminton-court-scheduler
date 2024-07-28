@@ -1,4 +1,3 @@
-import { start } from 'repl';
 import { Player, Court, SessionSettings } from '../types/types'
 
 const ADVANCED_DEBUG_LOGGING = false; // Enable advanced logging
@@ -109,12 +108,58 @@ function schedulePlayer(playerQueue: Player[], player: Player, gameStartTime: nu
   player.lastScheduledEndTimestamp = gameStartTime + settings.expectedGameDuration;
 }
 
-function generateQueue(players: Player[], courts: Court[], queueLength: number, settings: SessionSettings) {
-  console.log("Generating court queue...");
+// Returns a list of players created using the team balancing algorithm. Format: [T1P1, T2P1, T1P2, T2P2] (T = Team, P = Player)
+function assignCourtPlayers(playerQueue: Player[], gameStartTime: number, settings: SessionSettings) {
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log("Picking Team 1, Player 1...");
+  }
 
-  let result: Court[] = []; // Generated queue of courts
+  // Assign first player in queue to team 1
+  let team1Player1 = playerQueue[0];
+  schedulePlayer(playerQueue, team1Player1, gameStartTime, settings);
 
-  // Step 1: Sort players by time played (longest wait first)
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log(structuredClone(team1Player1));
+
+    console.log("***");
+    console.log("Picking Team 2, Player 1...");
+  }
+
+  // Assign next best player in queue to team 2 using TIME and DIVERSITY heuristics
+  let team2Player1 = assignBestPlayer(playerQueue, gameStartTime, [team1Player1], settings);
+  schedulePlayer(playerQueue, team2Player1, gameStartTime, settings);
+
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log(structuredClone(team2Player1));
+
+    console.log("***");
+    console.log("Picking Team 1, Player 2...");
+  }
+
+  // Assign next best player in queue to team 1 using TIME and DIVERSITY heuristics
+  let team1Player2 = assignBestPlayer(playerQueue, gameStartTime, [team1Player1, team2Player1], settings);
+  schedulePlayer(playerQueue, team1Player2, gameStartTime, settings);
+
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log(structuredClone(team1Player2));
+
+    console.log("***");
+    console.log("Picking Team 2, Player 2...");
+  }
+
+  // Assign next best player in queue to team 2 using TIME, DIVERSITY and BALANCE heuristics
+  let team2Player2 = assignBestPlayer(playerQueue, gameStartTime, [team1Player1, team2Player1, team1Player2], settings);
+  schedulePlayer(playerQueue, team2Player2, gameStartTime, settings);
+
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log(structuredClone(team2Player2));
+  }
+
+  return [team1Player1, team1Player2, team2Player1, team2Player2];
+}
+
+// Returns a priority-sorted player queue from the given list of players
+function generatePlayerQueue(players: Player[]) {
   let playerQueue: Player[] = [...players];
   playerQueue.sort((a, b) => {
     if (a.isPlaying !== b.isPlaying) {
@@ -123,6 +168,16 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
       return a.lastPlayedTimestamp - b.lastPlayedTimestamp
     }
   });
+  return playerQueue;
+}
+
+function generateQueue(players: Player[], courts: Court[], queueLength: number, settings: SessionSettings) {
+  console.log("Generating court queue...");
+
+  let result: Court[] = []; // Generated queue of courts
+
+  // Step 1: Sort players by time played (longest wait first)
+  let playerQueue: Player[] = generatePlayerQueue(players);
 
   console.log("Computed time-based player queue:");
   console.log(structuredClone(playerQueue));
@@ -174,59 +229,7 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
       console.log("Scheduling Court " + i + " at time " + scheduledGameTime + "...");
     }
 
-    // Step 3a: Assign first player in queue to team 1
-    if (ADVANCED_DEBUG_LOGGING) {
-      console.log("***");
-      console.log("Picking Team 1, Player 1...");
-    }
-
-    let team1Player1 = playerQueue[0];
-    schedulePlayer(playerQueue, team1Player1, scheduledGameTime, settings);
-
-    if (ADVANCED_DEBUG_LOGGING) {
-      console.log(structuredClone(team1Player1));
-    }
-
-    // Step 3b: Assign next best player in queue to team 2 using TIME and DIVERSITY heuristics
-    if (ADVANCED_DEBUG_LOGGING) {
-      console.log("***");
-      console.log("Picking Team 2, Player 1...");
-    }
-
-    let team2Player1 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1], settings);
-    schedulePlayer(playerQueue, team2Player1, scheduledGameTime, settings);
-
-    if (ADVANCED_DEBUG_LOGGING) {
-      console.log(structuredClone(team2Player1));
-    }
-
-    // Step 3c: Assign next best player in queue to team 1 using TIME and DIVERSITY heuristics
-    if (ADVANCED_DEBUG_LOGGING) {
-      console.log("***");
-      console.log("Picking Team 1, Player 2...");
-    }
-
-    let team1Player2 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1, team2Player1], settings);
-    schedulePlayer(playerQueue, team1Player2, scheduledGameTime, settings);
-
-    if (ADVANCED_DEBUG_LOGGING) {
-      console.log(structuredClone(team1Player2));
-    }
-
-    // Step 3d: Assign next best player in queue to team 2 using TIME, DIVERSITY and BALANCE heuristics
-    if (ADVANCED_DEBUG_LOGGING) {
-      console.log("***");
-      console.log("Picking Team 2, Player 2...");
-    }
-
-    let team2Player2 = assignBestPlayer(playerQueue, scheduledGameTime, [team1Player1, team2Player1, team1Player2], settings);
-    schedulePlayer(playerQueue, team2Player2, scheduledGameTime, settings);
-
-    if (ADVANCED_DEBUG_LOGGING) {
-      console.log(structuredClone(team2Player2));
-    }
-
-    court.players = [team1Player1, team1Player2, team2Player1, team2Player2];
+    court.players = assignCourtPlayers(playerQueue, scheduledGameTime, settings);
     result.push(court);
   }
 
@@ -236,6 +239,25 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
   return result;
 }
 
+function getNextCourt(queue: Court[], players: Player[], settings: SessionSettings) {
+  let nextCourt: Court = { ...queue[0] };
+  if (nextCourt && nextCourt.players.every(p => !p.isPlaying)) {
+    return nextCourt; // The next court in the queue is valid, immediately return it
+  }
+
+  // Generate the next court using the balancing algorithm, force-excluding players who are already playing
+  let playerQueue = generatePlayerQueue(players).filter(p => !p.isPlaying);
+
+  if (playerQueue.length < 4) {
+    nextCourt.players = [];
+    return nextCourt;
+  }
+
+  nextCourt.players = assignCourtPlayers(playerQueue, Date.now(), settings);
+  return nextCourt;
+}
+
 export const Scheduler = {
-  generateQueue
+  generateQueue,
+  getNextCourt
 }
