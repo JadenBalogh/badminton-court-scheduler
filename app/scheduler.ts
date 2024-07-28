@@ -127,6 +127,11 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
   console.log("Computed time-based player queue:");
   console.log(structuredClone(playerQueue));
 
+  if (playerQueue.length === 0) {
+    console.log("Failed to generate queue. No players.");
+    return result;
+  }
+
   // Step 2: Calculate estimated start times based on the current active court estimated times remaining
   let courtQueue: Court[] = [...courts];
   courtQueue.sort((a, b) => {
@@ -136,6 +141,11 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
     let playedDuration = Date.now() - court.startTime;
     return settings.expectedGameDuration - playedDuration;
   });
+
+  if (courtQueue.length === 0) {
+    console.log("Failed to generate queue. No active courts.");
+    return result;
+  }
 
   console.log("Computed estimated times remaining per active court:");
   console.log(structuredClone(startOffsets));
