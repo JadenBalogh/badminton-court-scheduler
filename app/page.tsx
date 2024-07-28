@@ -56,6 +56,7 @@ export default function Home() {
   function saveSession() {
     console.log("Saved session data.");
 
+    window.sessionStorage.setItem("playerDatas", JSON.stringify(playerDatas));
     window.sessionStorage.setItem("activePlayers", JSON.stringify(activePlayers));
     window.sessionStorage.setItem("activeCourts", JSON.stringify(activeCourts));
     window.sessionStorage.setItem("courtQueue", JSON.stringify(courtQueue));
@@ -64,9 +65,10 @@ export default function Home() {
   function loadSession() {
     console.log("Loaded session data.");
 
-    activePlayers = JSON.parse(window.sessionStorage.getItem("activePlayers") ?? "") ?? [];
-    activeCourts = JSON.parse(window.sessionStorage.getItem("activeCourts") ?? "") ?? [];
-    courtQueue = JSON.parse(window.sessionStorage.getItem("courtQueue") ?? "") ?? [];
+    playerDatas = JSON.parse(window.sessionStorage.getItem("playerDatas") ?? "[]");
+    activePlayers = JSON.parse(window.sessionStorage.getItem("activePlayers") ?? "[]");
+    activeCourts = JSON.parse(window.sessionStorage.getItem("activeCourts") ?? "[]");
+    courtQueue = JSON.parse(window.sessionStorage.getItem("courtQueue") ?? "[]");
     refreshState();
   }
 
@@ -77,6 +79,10 @@ export default function Home() {
     loadRegisteredPlayers();
 
     async function loadPlayerData() {
+      if (playerDatas.length > 0) {
+        return; // Player data is already loaded, don't overwrite
+      }
+
       let data = await fetch('./player-data.txt');
       let text = await data.text();
 
