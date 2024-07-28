@@ -127,8 +127,8 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
   console.log("Computed time-based player queue:");
   console.log(structuredClone(playerQueue));
 
-  if (playerQueue.length === 0) {
-    console.log("Failed to generate queue. No players.");
+  if (playerQueue.length < 4) {
+    console.log("Failed to generate queue. Not enough players.");
     return result;
   }
 

@@ -46,8 +46,6 @@ export default function Home() {
   const [courtQueueState, setCourtQueueState] = useState<Court[]>([]);
   // const [newGame, setNewGame] = useState<Court>();
 
-  const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
-
   function refreshState() {
     setPlayerDatasState([...playerDatas]);
     setRegisteredPlayersState([...registeredPlayers]);
@@ -141,6 +139,7 @@ export default function Home() {
       removeActivePlayer(event.target.value);
     }
 
+    generateCourtQueue();
     refreshState();
   }
 
@@ -169,6 +168,10 @@ export default function Home() {
   function removeActivePlayer(name: string) {
     let username = toUsername(name);
     activePlayers = activePlayers.filter(player => player.username != username);
+  }
+
+  function isPlayerActive(name: string) {
+    return activePlayers.find(p => p.username === toUsername(name)) !== undefined;
   }
 
   function getStartDelay(court: Court) {
@@ -293,15 +296,16 @@ export default function Home() {
   }
 
   function handleCheckAllPlayers() {
-    checkboxRefs.current.forEach(ref => {
-      if (ref && !ref.checked) {
-        ref.checked = true;
-        addActivePlayer(ref.value);
-      } else if (ref) {
-        ref.checked = false;
-        removeActivePlayer(ref.value);
+    for (let playerName of registeredPlayers) {
+      if (isPlayerActive(playerName)) {
+        removeActivePlayer(playerName);
+      } else {
+        addActivePlayer(playerName);
       }
-    });
+    }
+
+    generateCourtQueue();
+    refreshState();
   }
 
   return (
@@ -353,15 +357,15 @@ export default function Home() {
           </button>
 
           <div>
-            {registeredPlayersState.map((player, idx) =>
+            {registeredPlayersState.map((playerName, idx) =>
               <div key={idx}>
                 <input
                   type="checkbox"
-                  value={player}
+                  value={playerName}
+                  checked={isPlayerActive(playerName)}
                   onChange={(event) => onPlayerChecked(event)}
-                  ref={el => checkboxRefs.current[idx] = el}
                 />
-                {' '}{player}
+                {' '}{playerName}
               </div>
             )}
           </div>
