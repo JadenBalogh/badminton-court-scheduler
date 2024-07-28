@@ -54,13 +54,32 @@ export default function Home() {
     setActivePlayersState([...activePlayers]);
     setActiveCourtsState([...activeCourts]);
     setCourtQueueState([...courtQueue]);
+
+    saveSession();
+  }
+
+  function saveSession() {
+    console.log("Saved session data.");
+
+    window.sessionStorage.setItem("activePlayers", JSON.stringify(activePlayers));
+    window.sessionStorage.setItem("activeCourts", JSON.stringify(activeCourts));
+    window.sessionStorage.setItem("courtQueue", JSON.stringify(courtQueue));
+  }
+
+  function loadSession() {
+    console.log("Loaded session data.");
+
+    activePlayers = JSON.parse(window.sessionStorage.getItem("activePlayers") ?? "") ?? [];
+    activeCourts = JSON.parse(window.sessionStorage.getItem("activeCourts") ?? "") ?? [];
+    courtQueue = JSON.parse(window.sessionStorage.getItem("courtQueue") ?? "") ?? [];
+    refreshState();
   }
 
   // Load player data, load registered players and initialize empty courts
   useEffect(() => {
+    loadSession();
     loadPlayerData();
     loadRegisteredPlayers();
-    clearCourts();
 
     async function loadPlayerData() {
       let data = await fetch('./player-data.txt');
@@ -101,7 +120,7 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       refreshState();
-      console.log("State refreshed.");
+      console.log("Automatic state refresh complete.");
     }, 30000);
 
     return () => clearInterval(interval);
