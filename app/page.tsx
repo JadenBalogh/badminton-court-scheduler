@@ -42,7 +42,6 @@ export default function Home() {
   const [activePlayersState, setActivePlayersState] = useState<Player[]>([]); // List of players included in the current session
   const [activeCourtsState, setActiveCourtsState] = useState<Court[]>([]);
   const [courtQueueState, setCourtQueueState] = useState<Court[]>([]);
-  // const [newGame, setNewGame] = useState<Court>();
 
   function refreshState() {
     setPlayerDatasState([...playerDatas]);
