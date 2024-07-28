@@ -20,7 +20,6 @@ const BALANCE_SCORE_WEIGHT = 1;
 const SKILL_SCORE_WEIGHT = 1;
 
 let playerDatas: PlayerData[] = [];
-let registeredPlayers: string[] = [];
 let activePlayers: Player[] = [];
 let activeCourts: Court[] = [];
 let courtQueue: Court[] = [];
@@ -40,15 +39,13 @@ export default function Home() {
   });
 
   const [playerDatasState, setPlayerDatasState] = useState<PlayerData[]>([]); // Skill level data for all players in database (text file for now)
-  const [registeredPlayersState, setRegisteredPlayersState] = useState<string[]>([]); // Generated list of registered players for the current session
-  const [activePlayersState, setActivePlayersState] = useState<Player[]>([]); // Players who are actively included in the algorithm
+  const [activePlayersState, setActivePlayersState] = useState<Player[]>([]); // List of players included in the current session
   const [activeCourtsState, setActiveCourtsState] = useState<Court[]>([]);
   const [courtQueueState, setCourtQueueState] = useState<Court[]>([]);
   // const [newGame, setNewGame] = useState<Court>();
 
   function refreshState() {
     setPlayerDatasState([...playerDatas]);
-    setRegisteredPlayersState([...registeredPlayers]);
     setActivePlayersState([...activePlayers]);
     setActiveCourtsState([...activeCourts]);
     setCourtQueueState([...courtQueue]);
@@ -100,14 +97,19 @@ export default function Home() {
     }
 
     async function loadRegisteredPlayers() {
+      if (activePlayers.length > 0) {
+        return; // Players are already loaded, don't overwrite
+      }
+
       let data = await fetch('./registered-players.txt');
       let text = await data.text();
 
-      registeredPlayers = [];
+      activePlayers = [];
       let lines = text.split(/[\r\n]+/);
 
       for (let line of lines) {
-        registeredPlayers.push(line.trim());
+        let playerName = line.trim();
+        addActivePlayer(playerName);
       }
 
       refreshState();
@@ -133,12 +135,7 @@ export default function Home() {
   }
 
   function onPlayerChecked(event: ChangeEvent<HTMLInputElement>) {
-    if (event.target.checked) {
-      addActivePlayer(event.target.value);
-    } else {
-      removeActivePlayer(event.target.value);
-    }
-
+    setPlayerEnabled(event.target.value, event.target.checked);
     generateCourtQueue();
     refreshState();
   }
@@ -156,6 +153,7 @@ export default function Home() {
       name: name,
       username: username,
       skillLevel: playerData ? playerData.skillLevel : 2,
+      isEnabled: false,
       isPlaying: false,
       lastPlayedTimestamp: 0,
       lastPartneredTimestamp: {},
@@ -170,8 +168,18 @@ export default function Home() {
     activePlayers = activePlayers.filter(player => player.username != username);
   }
 
-  function isPlayerActive(name: string) {
-    return activePlayers.find(p => p.username === toUsername(name)) !== undefined;
+  function isPlayerEnabled(name: string) {
+    let username = toUsername(name);
+    let player = activePlayers.find(p => p.username === username);
+    return player !== undefined && player.isEnabled;
+  }
+
+  function setPlayerEnabled(name: string, enabled: boolean) {
+    let username = toUsername(name);
+    let player = activePlayers.find(p => p.username === username);
+    if (player) {
+      player.isEnabled = enabled;
+    }
   }
 
   function getStartDelay(court: Court) {
@@ -240,7 +248,8 @@ export default function Home() {
   }
 
   function generateCourtQueue() {
-    courtQueue = Scheduler.generateQueue(activePlayers, activeCourts, 40, sessionSettings);
+    let players = activePlayers.filter(p => p.isEnabled);
+    courtQueue = Scheduler.generateQueue(players, activeCourts, 40, sessionSettings);
   }
 
   function handleStartSession() {
@@ -296,12 +305,13 @@ export default function Home() {
   }
 
   function handleCheckAllPlayers() {
-    for (let playerName of registeredPlayers) {
-      if (isPlayerActive(playerName)) {
-        removeActivePlayer(playerName);
-      } else {
-        addActivePlayer(playerName);
-      }
+    if (!activePlayers || activePlayers.length === 0) {
+      return;
+    }
+
+    let enabled = isPlayerEnabled(activePlayers[0].name);
+    for (let player of activePlayers) {
+      setPlayerEnabled(player.name, !enabled);
     }
 
     generateCourtQueue();
@@ -357,15 +367,15 @@ export default function Home() {
           </button>
 
           <div>
-            {registeredPlayersState.map((playerName, idx) =>
+            {activePlayersState.map((player, idx) =>
               <div key={idx}>
                 <input
                   type="checkbox"
-                  value={playerName}
-                  checked={isPlayerActive(playerName)}
+                  value={player.name}
+                  checked={isPlayerEnabled(player.name)}
                   onChange={(event) => onPlayerChecked(event)}
                 />
-                {' '}{playerName}
+                {' '}{player.name}
               </div>
             )}
           </div>
