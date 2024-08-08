@@ -21,7 +21,7 @@ export default function ActiveCourts({ courts, handleGameFinished, handleSkipPla
 
     let playTime = getPlayTime(court);
     let minsText = playTime === 1 ? "min" : "mins";
-    return "Started " + playTime + " " + minsText + " ago.";
+    return playTime === 0 ? "Just started!" : "Started " + playTime + " " + minsText + " ago.";
   }
 
   return (
@@ -29,7 +29,7 @@ export default function ActiveCourts({ courts, handleGameFinished, handleSkipPla
       {
         courts.map((court) =>
           <div className="flex flex-col w-80 items-center gap-y-2" key={court.id}>
-            <CourtDisplay court={court} handleSkipPlayer={handleSkipPlayer} />
+            <CourtDisplay isActive={true} court={court} handleSkipPlayer={handleSkipPlayer} />
             <p className="text-sm">{getPlayTimeText(court)}</p>
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-32 h-12 mt-4 rounded"

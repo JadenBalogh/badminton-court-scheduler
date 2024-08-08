@@ -422,6 +422,7 @@ export default function Home() {
           {courtQueueState.map((court, i) =>
             <div className="flex flex-col w-80 items-center gap-y-2" key={i}>
               <CourtDisplay
+                isActive={false}
                 court={court}
                 handleSkipPlayer={() => { }}
               />
