@@ -396,7 +396,7 @@ export default function Home() {
   }
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-between gap-y-8 py-16">
+    <main className="relative flex min-h-screen flex-col items-center justify-between gap-y-8 pt-16">
       <ConfirmDialog
         show={showConfirm}
         options={confirmOptions}
@@ -472,6 +472,28 @@ export default function Home() {
           <button onClick={clearCourts}>
             Clear all courts!
           </button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center text-xs w-full h-10 bg-slate-50 mt-8 gap-x-4">
+        <div>
+          <p>Made by Jaden Balogh and Chensheng Xu</p>
+        </div>
+        |
+        <div>
+          <a
+            className="text-slate-600"
+            target="_blank"
+            href="https://icons8.com/icon/TWjhQj2xXDpL/badminton">
+            badminton icon
+          </a>
+          {' '}by{' '}
+          <a
+            className="text-slate-600"
+            target="_blank"
+            href="https://icons8.com">
+            Icons8
+          </a>
         </div>
       </div>
     </main>
