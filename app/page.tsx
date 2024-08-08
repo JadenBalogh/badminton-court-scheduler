@@ -1,7 +1,8 @@
 'use client'
 
-import { Player, Court, SessionSettings, PlayerData } from '../types/types'
+import { Player, Court, SessionSettings, PlayerData, ConfirmDialogOptions, ConfirmDialogCallback, Callback } from '../types/types'
 import ActiveCourts from './activeCourts';
+import ConfirmDialog from './confirmDialog';
 import CourtDisplay from './courtDisplay';
 import { Scheduler } from './scheduler';
 import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
@@ -18,6 +19,13 @@ const TIME_SCORE_WEIGHT = 1;
 const DIVERSITY_SCORE_WEIGHT = 1;
 const BALANCE_SCORE_WEIGHT = 1;
 const SKILL_SCORE_WEIGHT = 1;
+
+const DEFAULT_CONFIRM_OPTIONS: ConfirmDialogOptions = {
+  title: "",
+  desc: "",
+  confirmText: "",
+  cancelText: "",
+}
 
 let playerDatas: PlayerData[] = [];
 let activePlayers: Player[] = [];
@@ -42,6 +50,10 @@ export default function Home() {
   const [activePlayersState, setActivePlayersState] = useState<Player[]>([]); // List of players included in the current session
   const [activeCourtsState, setActiveCourtsState] = useState<Court[]>([]);
   const [courtQueueState, setCourtQueueState] = useState<Court[]>([]);
+
+  const [showConfirm, setShowConfirm] = useState<boolean>(false);
+  const [confirmOptions, setConfirmOptions] = useState<ConfirmDialogOptions>(DEFAULT_CONFIRM_OPTIONS);
+  const [confirmCallback, setConfirmCallback] = useState<ConfirmDialogCallback>(() => () => { });
 
   function refreshState() {
     setPlayerDatasState([...playerDatas]);
@@ -131,8 +143,36 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  async function awaitConfirm(options: ConfirmDialogOptions, onConfirmed: Callback) {
+    setConfirmOptions(options);
+    setShowConfirm(true);
+
+    let confirmed = await new Promise((resolve, reject) => {
+      setConfirmCallback(() => (confirmed: boolean) => {
+        clearTimeout(confirmTimeout);
+        resolve(confirmed);
+      });
+
+      const confirmTimeout = setTimeout(() => {
+        console.log("Confirmation timed out after 10 seconds.");
+        resolve(false);
+      }, 10000);
+    });
+
+    setShowConfirm(false);
+
+    if (confirmed) {
+      onConfirmed();
+    }
+  }
+
   function toUsername(name: string) {
     return name.trim().replace(/\s/g, '').toLowerCase();
+  }
+
+  function toFirstName(name: string) {
+    let names = name.split(/\s/g);
+    return names.length > 0 ? names.at(0) : "[Player]";
   }
 
   function getPlayerData(username: string) {
@@ -263,6 +303,15 @@ export default function Home() {
   }
 
   function handleStartSession() {
+    awaitConfirm({
+      title: "Start session?",
+      desc: "Starting the session will clear all existing player data.",
+      confirmText: "Start",
+      cancelText: "Cancel"
+    }, onSessionStarted);
+  }
+
+  function onSessionStarted() {
     resetPlayers();
     clearCourts();
     generateCourtQueue();
@@ -272,14 +321,32 @@ export default function Home() {
   }
 
   function handleGameFinished(index: number) {
+    awaitConfirm({
+      title: "Finish game?",
+      desc: "The court will be assigned to the next group in the queue.",
+      confirmText: "Finish",
+      cancelText: "Cancel"
+    }, () => onGameFinished(index));
+  }
+
+  function onGameFinished(index: number) {
     finishGame(index);
     startGame(index, getNextCourt()); // TODO: Highlight the started court tile for 20 seconds
     generateCourtQueue();
     refreshState();
   }
 
-  // TODO: write algorithm to pick the best player to fill in the spot
   function handleSkipPlayer(player: Player) {
+    awaitConfirm({
+      title: "Skip " + toFirstName(player.name) + "?",
+      desc: toFirstName(player.name) + " will be moved to the next available court.",
+      confirmText: "Skip",
+      cancelText: "Cancel"
+    }, () => onPlayerSkipped(player));
+  }
+
+  // TODO: write algorithm to pick the best player to fill in the spot
+  function onPlayerSkipped(player: Player) {
     console.log("Skipping player", player.name);
 
     // setActiveCourts(
@@ -329,7 +396,13 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between gap-y-8 py-16">
+    <main className="relative flex min-h-screen flex-col items-center justify-between gap-y-8 py-16">
+      <ConfirmDialog
+        show={showConfirm}
+        options={confirmOptions}
+        callback={confirmCallback}
+      />
+
       <h2 className="mb-3 text-3xl font-semibold">
         Active Courts
       </h2>

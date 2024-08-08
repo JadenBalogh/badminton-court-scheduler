@@ -37,3 +37,13 @@ export type SessionSettings = {
   balanceScoreWeight: number;
   skillScoreWeight: number;
 }
+
+export type ConfirmDialogOptions = {
+  title: string,
+  desc: string,
+  confirmText: string,
+  cancelText: string,
+}
+
+export type ConfirmDialogCallback = (confirmed: boolean) => void;
+export type Callback = () => void;
