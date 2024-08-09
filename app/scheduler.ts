@@ -257,7 +257,26 @@ function getNextCourt(queue: Court[], players: Player[], settings: SessionSettin
   return nextCourt;
 }
 
+function getBestPlayer(court: Court, index: number, players: Player[], settings: SessionSettings) {
+  let playerQueue = generatePlayerQueue(players).filter(p => !p.isPlaying);
+  let courtPlayers: Player[];
+
+  // Re-order the court so that teams are maintained but the open slot is always last
+  if (index === 0) {
+    courtPlayers = [court.players[3], court.players[2], court.players[1]];
+  } else if (index === 1) {
+    courtPlayers = [court.players[2], court.players[3], court.players[0]];
+  } else if (index === 2) {
+    courtPlayers = [court.players[1], court.players[0], court.players[3]];
+  } else {
+    courtPlayers = [court.players[0], court.players[1], court.players[2]];
+  }
+
+  return assignBestPlayer(playerQueue, Date.now(), courtPlayers, settings);
+}
+
 export const Scheduler = {
   generateQueue,
-  getNextCourt
+  getNextCourt,
+  getBestPlayer
 }

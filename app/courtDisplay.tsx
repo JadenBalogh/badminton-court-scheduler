@@ -6,7 +6,7 @@ const NEW_COURT_DURATION = 10000; // How long a court is considered "new" after 
 type CourtProps = {
   isActive: boolean,
   court: Court,
-  handleSkipPlayer: (player: Player) => void
+  handleSkipPlayer: (court: Court, player: Player) => void
 }
 
 export default function CourtDisplay({ isActive, court, handleSkipPlayer = () => { } }: CourtProps) {
@@ -20,11 +20,11 @@ export default function CourtDisplay({ isActive, court, handleSkipPlayer = () =>
         ? "bg-orange-200 font-semibold outline outline-3 outline-amber-200"
         : "bg-gradient-to-b from-neutral-300 to-zinc-300"}`
     }>
-      <CourtPlayer player={court.players[0]} handleSkipPlayer={handleSkipPlayer} />
-      <CourtPlayer player={court.players[1]} handleSkipPlayer={handleSkipPlayer} />
+      <CourtPlayer court={court} player={court.players[0]} handleSkipPlayer={handleSkipPlayer} />
+      <CourtPlayer court={court} player={court.players[1]} handleSkipPlayer={handleSkipPlayer} />
       <p className="py-2 text-sm">vs.</p>
-      <CourtPlayer player={court.players[2]} handleSkipPlayer={handleSkipPlayer} />
-      <CourtPlayer player={court.players[3]} handleSkipPlayer={handleSkipPlayer} />
+      <CourtPlayer court={court} player={court.players[2]} handleSkipPlayer={handleSkipPlayer} />
+      <CourtPlayer court={court} player={court.players[3]} handleSkipPlayer={handleSkipPlayer} />
     </div>
   );
 }

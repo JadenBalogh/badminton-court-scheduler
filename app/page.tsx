@@ -302,6 +302,11 @@ export default function Home() {
     return Scheduler.getNextCourt(courtQueue, players, sessionSettings);
   }
 
+  function getBestPlayer(court: Court, index: number) {
+    let players = activePlayers.filter(p => p.isEnabled);
+    return Scheduler.getBestPlayer(court, index, players, sessionSettings);
+  }
+
   function handleStartSession() {
     awaitConfirm({
       title: "Start session?",
@@ -336,38 +341,28 @@ export default function Home() {
     refreshState();
   }
 
-  function handleSkipPlayer(player: Player) {
+  function handleSkipPlayer(court: Court, player: Player) {
     awaitConfirm({
       title: "Skip " + toFirstName(player.name) + "?",
       desc: toFirstName(player.name) + " will be moved to the next available court.",
       confirmText: "Skip",
       cancelText: "Cancel"
-    }, () => onPlayerSkipped(player));
+    }, () => onPlayerSkipped(court, player));
   }
 
-  // TODO: write algorithm to pick the best player to fill in the spot
-  function onPlayerSkipped(player: Player) {
-    console.log("Skipping player", player.name);
+  function onPlayerSkipped(court: Court, player: Player) {
+    console.log("Skipping player: " + player.name);
 
-    // setActiveCourts(
-    //   activeCourts.map((court) => {
-    //     if (court.players.some(p => p.name === player.name)) {
-    //       return { ...court, players: court.players.filter(p => p.name !== player.name) };
-    //     }
-    //     return court;
-    //   })
-    // );
+    let skippedIndex = court.players.indexOf(player);
+    let replacementPlayer = getBestPlayer(court, skippedIndex);
+    court.players.splice(skippedIndex, 1, replacementPlayer);
+    startGame(court.id, court);
 
-    // setActivePlayers(
-    //   activePlayers.map((p) => {
-    //     if (p.name === player.name) {
-    //       return { ...p, lastPlayedTimestamp: Date.now() - MAX_TIME_SCORE_WAIT_TIME };
-    //     }
-    //     return p;
-    //   })
-    // )
+    player.isPlaying = false;
+    player.lastPlayedTimestamp = 0; // Set the skipped player to the max wait time to ensure being prioritized next game
 
-    // TODO: add it here
+    generateCourtQueue();
+    refreshState();
   }
 
   function printState() {

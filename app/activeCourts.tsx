@@ -4,7 +4,7 @@ import CourtDisplay from "./courtDisplay";
 type ActiveCourtsProps = {
   courts: Court[];
   handleGameFinished: (i: number) => void;
-  handleSkipPlayer: (player: Player) => void;
+  handleSkipPlayer: (court: Court, player: Player) => void;
 }
 
 export default function ActiveCourts({ courts, handleGameFinished, handleSkipPlayer }: ActiveCourtsProps) {
