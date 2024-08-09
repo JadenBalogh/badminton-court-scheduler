@@ -69,11 +69,6 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
   // Consider only players that haven't already been selected as part of this team
   let candidates = playerQueue.slice(0, playerQueue.length - selectedPlayers.length);
 
-  if (ADVANCED_DEBUG_LOGGING) {
-    console.log("Evaluating candidates:")
-    console.log(structuredClone(candidates));
-  }
-
   // Try to filter out any player that has a 0 balance AND skill score for this team (i.e. outside the allowed skill variances)
   let skillFilterResults = candidates.filter(player => calculateBalanceScore(player, selectedPlayers, settings) + calculateSkillScore(player, selectedPlayers, settings) > 0);
   if (skillFilterResults.length > 0) {
@@ -88,6 +83,8 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
   });
 
   if (ADVANCED_DEBUG_LOGGING) {
+    console.log("Evaluating candidates:")
+    console.log(candidates.map((player) => [player.name, calculateTotalScore(player, gameStartTime, selectedPlayers, settings), player]).sort((a, b) => Number(b[1]) - Number(a[1])));
     console.log("Found best player with total score: " + calculateTotalScore(bestPlayer, gameStartTime, selectedPlayers, settings));
     console.log("Best player score breakdown:");
     console.log(" -> TIME: " + calculateTimeScore(bestPlayer, gameStartTime, settings) * settings.timeScoreWeight) + " (last scheduled end: " + bestPlayer.lastScheduledEndTimestamp + ")";
