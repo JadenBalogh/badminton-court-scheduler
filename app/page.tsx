@@ -27,6 +27,8 @@ const DEFAULT_CONFIRM_OPTIONS: ConfirmDialogOptions = {
   cancelText: "",
 }
 
+export const NEW_COURT_DURATION = 10000; // How long a court is considered "new" after starting
+
 let playerDatas: PlayerData[] = [];
 let activePlayers: Player[] = [];
 let activeCourts: Court[] = [];
@@ -166,6 +168,13 @@ export default function Home() {
     }
   }
 
+  function queueRefresh(delay: number) {
+    setTimeout(() => {
+      refreshState();
+      console.log("Queued state refresh complete.");
+    }, delay);
+  }
+
   function toUsername(name: string) {
     return name.trim().replace(/\s/g, '').toLowerCase();
   }
@@ -270,6 +279,8 @@ export default function Home() {
     for (let player of activeCourts[index].players) {
       player.isPlaying = true;
     }
+
+    queueRefresh(NEW_COURT_DURATION + 100);
   }
 
   function finishGame(index: number) {
