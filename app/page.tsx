@@ -8,6 +8,7 @@ import { Scheduler } from './scheduler';
 import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 
 const COURT_COUNT = 3;
+const QUEUE_LENGTH = 6;
 const MAX_TEAM_SKILL_VARIANCE = 0;
 const MAX_INDIVIDUAL_SKILL_VARIANCE = 2;
 
@@ -305,7 +306,7 @@ export default function Home() {
 
   function generateCourtQueue() {
     let players = activePlayers.filter(p => p.isEnabled);
-    courtQueue = Scheduler.generateQueue(players, activeCourts, 40, sessionSettings);
+    courtQueue = Scheduler.generateQueue(players, activeCourts, QUEUE_LENGTH, sessionSettings);
   }
 
   function getNextCourt() {
@@ -421,7 +422,7 @@ export default function Home() {
 
       <div className="flex flex-col w-4/5 my-8">
         <h2 className={`mb-3 text-2xl font-semibold`}>
-          Upcoming Games
+          Upcoming Games {"->"}
         </h2>
 
         <div className="flex py-4 gap-x-4 w-full overflow-x-auto">
