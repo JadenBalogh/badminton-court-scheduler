@@ -348,7 +348,7 @@ export default function Home() {
 
   function onGameFinished(index: number) {
     finishGame(index);
-    startGame(index, getNextCourt()); // TODO: Highlight the started court tile for 20 seconds
+    startGame(index, getNextCourt());
     generateCourtQueue();
     refreshState();
   }
