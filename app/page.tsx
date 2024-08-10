@@ -403,24 +403,26 @@ export default function Home() {
   }
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-between gap-y-8 pt-8">
+    <main className="relative flex min-h-screen flex-col items-center justify-between gap-y-16 pt-8">
       <ConfirmDialog
         show={showConfirm}
         options={confirmOptions}
         callback={confirmCallback}
       />
 
-      <h2 className="mb-3 text-3xl font-semibold">
-        Active Courts
-      </h2>
+      <div className="flex flex-col items-center gap-y-4">
+        <h2 className="mb-3 text-3xl font-semibold">
+          Active Courts
+        </h2>
 
-      <ActiveCourts
-        courts={activeCourtsState}
-        handleGameFinished={handleGameFinished}
-        handleSkipPlayer={handleSkipPlayer}
-      />
+        <ActiveCourts
+          courts={activeCourtsState}
+          handleGameFinished={handleGameFinished}
+          handleSkipPlayer={handleSkipPlayer}
+        />
+      </div>
 
-      <div className="flex flex-col w-4/5 my-8">
+      <div className="flex flex-col w-4/5">
         <h2 className={`mb-3 text-2xl font-semibold`}>
           Upcoming Games {"->"}
         </h2>
