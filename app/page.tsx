@@ -28,7 +28,7 @@ const DEFAULT_CONFIRM_OPTIONS: ConfirmDialogOptions = {
   cancelText: "",
 }
 
-export const NEW_COURT_DURATION = 10000; // How long a court is considered "new" after starting
+const NEW_COURT_DURATION: number = 10000; // How long a court is considered "new" after starting
 
 let playerDatas: PlayerData[] = [];
 let activePlayers: Player[] = [];

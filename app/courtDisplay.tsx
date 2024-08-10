@@ -1,6 +1,7 @@
 import { Court, Player } from '../types/types';
 import CourtPlayer from "./courtPlayer";
-import { NEW_COURT_DURATION } from './page';
+
+const NEW_COURT_DURATION: number = 10000; // How long a court is considered "new" after starting
 
 type CourtProps = {
   isActive: boolean,
