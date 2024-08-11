@@ -1,6 +1,6 @@
 import { Player, Court, SessionSettings } from '../types/types'
 
-const ADVANCED_DEBUG_LOGGING = true; // Enable advanced logging
+const ADVANCED_DEBUG_LOGGING = false; // Enable advanced logging
 const DEFAULT_PLAYER: Player = {
   name: "",
   username: "",
