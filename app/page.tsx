@@ -17,7 +17,7 @@ const MAX_TIME_SCORE_WAIT_TIME = 1800000; // 30 minutes in milliseconds
 const MAX_DIVERSITY_SCORE_PLAY_DELAY = 3600000; // 1 hour in milliseconds
 
 const TIME_SCORE_WEIGHT = 3; // How important is wait time?
-const DIVERSITY_SCORE_WEIGHT = 1; // How important is playing with a variety of people?
+const DIVERSITY_SCORE_WEIGHT = 2; // How important is playing with a variety of people?
 const BALANCE_SCORE_WEIGHT = 2; // How important is having balanced teams?
 const SKILL_SCORE_WEIGHT = 1; // How important is playing with other players of the same skill level?
 
