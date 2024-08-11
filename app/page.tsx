@@ -446,8 +446,9 @@ export default function Home() {
         courtIdx++;
       }
 
-      let gameEndTime = currentTime += EXPECTED_GAME_DURATION + (Math.random() * 2 * EXPECTED_GAME_DURATION_VARIANCE) - EXPECTED_GAME_DURATION_VARIANCE;
+      let gameEndTime = currentTime + EXPECTED_GAME_DURATION + Math.floor((Math.random() * 2 * EXPECTED_GAME_DURATION_VARIANCE) + 1) - EXPECTED_GAME_DURATION_VARIANCE;
       courtSampleQueue.push({ courtIdx, gameEndTime });
+      courtSampleQueue.sort((a, b) => a.gameEndTime - b.gameEndTime);
       startGame(courtIdx, getNextCourt(), currentTime, true);
       generateCourtQueue();
     }
