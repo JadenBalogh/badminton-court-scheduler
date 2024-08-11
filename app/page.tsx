@@ -560,10 +560,10 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 mt-16">
         <div className="flex flex-col gap-y-2">
           <h2 className={`text-2xl font-semibold`}>
-            Active Players
+            ADMIN
           </h2>
 
           <button
