@@ -9,7 +9,7 @@ import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 
 const COURT_COUNT = 3;
 const QUEUE_LENGTH = 6;
-const MAX_TEAM_SKILL_VARIANCE = 0;
+const MAX_TEAM_SKILL_VARIANCE = 1;
 const MAX_INDIVIDUAL_SKILL_VARIANCE = 2;
 
 const EXPECTED_GAME_DURATION = 600000; // 10 minutes in milliseconds
@@ -18,8 +18,8 @@ const MAX_TIME_SCORE_WAIT_TIME = 1800000; // 30 minutes in milliseconds
 const MAX_DIVERSITY_SCORE_PLAY_DELAY = 3600000; // 1 hour in milliseconds
 const MAX_DIVERSITY_SCORE_PLAY_COUNT = 5;
 
-const TIME_SCORE_WEIGHT = 4; // How important is wait time?
-const DIVERSITY_SCORE_WEIGHT = 3; // How important is playing with a variety of people?
+const TIME_SCORE_WEIGHT = 3; // How important is wait time?
+const DIVERSITY_SCORE_WEIGHT = 2; // How important is playing with a variety of people?
 const BALANCE_SCORE_WEIGHT = 2; // How important is having balanced teams?
 const SKILL_SCORE_WEIGHT = 1; // How important is playing with other players of the same skill level?
 
