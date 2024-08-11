@@ -39,11 +39,6 @@ let activePlayers: Player[] = [];
 let activeCourts: Court[] = [];
 let courtQueue: Court[] = [];
 
-export function getCurrentTime(): number {
-  let debugTimeOffset = Number.parseInt(window.sessionStorage.getItem("debugTimeOffset") ?? "0");
-  return Date.now() + debugTimeOffset;
-}
-
 export default function Home() {
   const [sessionSettings, setSessionSettings] = useState<SessionSettings>({
     courtCount: COURT_COUNT,
@@ -255,7 +250,7 @@ export default function Home() {
   }
 
   function getStartDelay(court: Court) {
-    let startDelayMS = court.startTime - getCurrentTime();
+    let startDelayMS = court.startTime - Scheduler.getCurrentTime();
     let startDelayMins = startDelayMS / 1000 / 60; // Convert ms to mins
     return Math.round(startDelayMins);
   }
@@ -338,7 +333,7 @@ export default function Home() {
   function fillEmptyCourts() {
     for (let i = 0; i < activeCourts.length; i++) {
       if (activeCourts[i].playerIDs.length === 0 && courtQueue[i]) {
-        startGame(i, courtQueue[i], getCurrentTime(), false);
+        startGame(i, courtQueue[i], Scheduler.getCurrentTime(), false);
       }
     }
   }
@@ -410,8 +405,8 @@ export default function Home() {
   }
 
   function onGameFinished(index: number) {
-    finishGame(index, getCurrentTime());
-    startGame(index, getNextCourt(), getCurrentTime(), false);
+    finishGame(index, Scheduler.getCurrentTime());
+    startGame(index, getNextCourt(), Scheduler.getCurrentTime(), false);
     generateCourtQueue();
     refreshState();
   }
@@ -431,7 +426,7 @@ export default function Home() {
     let skippedIndex = court.playerIDs.indexOf(player.username);
     let replacementPlayer = getBestPlayer(court, skippedIndex);
     court.playerIDs.splice(skippedIndex, 1, replacementPlayer.username);
-    startGame(court.id, court, getCurrentTime(), false);
+    startGame(court.id, court, Scheduler.getCurrentTime(), false);
 
     player.isPlaying = false;
     player.lastPlayedTimestamp = 0; // Set the skipped player to the max wait time to ensure being prioritized next game
@@ -457,7 +452,7 @@ export default function Home() {
   function runSampleGames(count: number) {
     let courtSampleQueue = [];
     let courtIdx = -1;
-    let currentTime = getCurrentTime();
+    let currentTime = Scheduler.getCurrentTime();
 
     resetSession();
     generateCourtQueue();

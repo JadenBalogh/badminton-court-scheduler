@@ -1,5 +1,4 @@
 import { Player, Court, SessionSettings } from '../types/types'
-import { getCurrentTime } from './page';
 
 const ADVANCED_DEBUG_LOGGING = false; // Enable advanced logging
 const DEFAULT_PLAYER: Player = {
@@ -329,8 +328,14 @@ function getBestPlayer(court: Court, index: number, players: Player[], settings:
   return assignBestPlayer(playerQueue, getCurrentTime(), courtPlayers, settings);
 }
 
+function getCurrentTime(): number {
+  let debugTimeOffset = Number.parseInt(window.sessionStorage.getItem("debugTimeOffset") ?? "0");
+  return Date.now() + debugTimeOffset;
+}
+
 export const Scheduler = {
   generateQueue,
   getNextCourt,
-  getBestPlayer
+  getBestPlayer,
+  getCurrentTime
 }

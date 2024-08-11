@@ -1,6 +1,6 @@
 import { Court, Player } from '../types/types';
 import CourtPlayer from "./courtPlayer";
-import { getCurrentTime } from './page';
+import { Scheduler } from './scheduler';
 
 const NEW_COURT_DURATION: number = 10000; // How long a court is considered "new" after starting
 const DEFAULT_PLAYER: Player = {
@@ -25,7 +25,7 @@ type CourtProps = {
 
 export default function CourtDisplay({ isActive, court, players, handleSkipPlayer = () => { } }: CourtProps) {
   function shouldHighlight(): boolean {
-    return isActive && getCurrentTime() - court.startTime < NEW_COURT_DURATION;
+    return isActive && Scheduler.getCurrentTime() - court.startTime < NEW_COURT_DURATION;
   }
 
   function getPlayer(index: number): Player {
