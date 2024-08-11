@@ -24,13 +24,20 @@ function calculateTimeScore(player: Player, gameStartTime: number, settings: Ses
   return Math.min(waitTime, settings.maxTimeScoreWaitTime) / settings.maxTimeScoreWaitTime;
 }
 
-// Returns the normalized DIVERSITY score for the given player. Just played with all others = 0.0 diversity score. Played with all others 1+ hours ago = 1.0 time score.
+// Returns the normalized DIVERSITY score for the given player. Divided into two parts:
+// 1. Delay: Just played with all others = 0.0 diversity score. Played with all others 1+ hours ago = 1.0 time score.
+// 2. Count: Played with everyone 5+ times = 0.0 diversity score. Never played with anyone = 1.0 diversity score.
 function calculateDiversityScore(player: Player, gameStartTime: number, otherPlayers: Player[], settings: SessionSettings) {
   let diversityScore = 0;
   for (let otherPlayer of otherPlayers) {
-    let lastPartneredTime = player.lastPartneredTimestamp[otherPlayer.username] ? player.lastPartneredTimestamp[otherPlayer.username] : 0;
+    let lastPartneredTime = player.lastPartneredTimestamp[otherPlayer.username] || 0;
     let lastPlayedDelay = gameStartTime - lastPartneredTime;
-    diversityScore += Math.min(lastPlayedDelay, settings.maxDiversityScoreWaitTime) / settings.maxDiversityScoreWaitTime;
+    let diversityDelayScore = Math.min(lastPlayedDelay, settings.maxDiversityScoreWaitTime) / settings.maxDiversityScoreWaitTime;
+
+    let timesPartnered = player.timesPartnered[otherPlayer.username] || 0;
+    let diversityCountScore = 1 - (Math.min(timesPartnered, settings.maxDiversityScorePlayCount) / settings.maxDiversityScorePlayCount);
+
+    diversityScore += diversityDelayScore * 0.5 + diversityCountScore * 0.5;
   }
   return diversityScore / otherPlayers.length;
 }

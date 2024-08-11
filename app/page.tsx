@@ -16,6 +16,7 @@ const EXPECTED_GAME_DURATION = 600000; // 10 minutes in milliseconds
 const EXPECTED_GAME_DURATION_VARIANCE = 300000; // 5 minutes in milliseconds
 const MAX_TIME_SCORE_WAIT_TIME = 1800000; // 30 minutes in milliseconds
 const MAX_DIVERSITY_SCORE_PLAY_DELAY = 3600000; // 1 hour in milliseconds
+const MAX_DIVERSITY_SCORE_PLAY_COUNT = 5;
 
 const TIME_SCORE_WEIGHT = 4; // How important is wait time?
 const DIVERSITY_SCORE_WEIGHT = 3; // How important is playing with a variety of people?
@@ -44,6 +45,7 @@ export default function Home() {
     expectedGameDuration: EXPECTED_GAME_DURATION,
     maxTimeScoreWaitTime: MAX_TIME_SCORE_WAIT_TIME,
     maxDiversityScoreWaitTime: MAX_DIVERSITY_SCORE_PLAY_DELAY,
+    maxDiversityScorePlayCount: MAX_DIVERSITY_SCORE_PLAY_COUNT,
     timeScoreWeight: TIME_SCORE_WEIGHT,
     diversityScoreWeight: DIVERSITY_SCORE_WEIGHT,
     balanceScoreWeight: BALANCE_SCORE_WEIGHT,

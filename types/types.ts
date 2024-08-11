@@ -34,6 +34,7 @@ export type SessionSettings = {
   expectedGameDuration: number;
   maxTimeScoreWaitTime: number;
   maxDiversityScoreWaitTime: number;
+  maxDiversityScorePlayCount: number;
   timeScoreWeight: number;
   diversityScoreWeight: number;
   balanceScoreWeight: number;
