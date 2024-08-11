@@ -229,7 +229,14 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
   console.log(structuredClone(startOffsets));
 
   let scheduledGameTime = Date.now();
-  playerQueue.forEach(player => getActivePlayer(player.username, players).lastScheduledEndTimestamp = player.lastPlayedTimestamp);
+  playerQueue.forEach(player => {
+    let scheduledEnd = player.lastPlayedTimestamp;
+    if (player.isPlaying) {
+      let playerCourt = courts.find((court) => court.playerIDs.includes(player.username));
+      scheduledEnd = playerCourt ? playerCourt.startTime + settings.expectedGameDuration : scheduledEnd;
+    }
+    getActivePlayer(player.username, players).lastScheduledEndTimestamp = scheduledEnd;
+  });
 
   // Step 3: Perform greedy algorithm to select players to add to the next court
   for (let i = 0; i < queueLength; i++) {
