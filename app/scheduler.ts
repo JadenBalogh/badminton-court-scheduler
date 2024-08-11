@@ -94,10 +94,18 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
 
   if (ADVANCED_DEBUG_LOGGING) {
     console.log("Evaluating candidates:")
-    console.log(candidates.map((player) => [player.name, calculateTotalScore(player, gameStartTime, selectedPlayers, settings), player]).sort((a, b) => Number(b[1]) - Number(a[1])));
+    console.log(candidates.map((player) => {
+      let scoresArray = [];
+      scoresArray.push("TIME: " + (calculateTimeScore(bestPlayer, gameStartTime, settings) * settings.timeScoreWeight) + " (last scheduled end: " + bestPlayer.lastScheduledEndTimestamp + ")");
+      scoresArray.push("DIVERSITY: " + calculateDiversityScore(bestPlayer, gameStartTime, selectedPlayers, settings) * settings.diversityScoreWeight);
+      scoresArray.push("BALANCE: " + calculateBalanceScore(bestPlayer, selectedPlayers, settings) * settings.balanceScoreWeight);
+      scoresArray.push("SKILL: " + calculateSkillScore(bestPlayer, selectedPlayers, settings) * settings.skillScoreWeight);
+      return [player.name, calculateTotalScore(player, gameStartTime, selectedPlayers, settings), scoresArray, player];
+    }).sort((a, b) => Number(b[1]) - Number(a[1])));
+
     console.log("Found best player with total score: " + calculateTotalScore(bestPlayer, gameStartTime, selectedPlayers, settings));
     console.log("Best player score breakdown:");
-    console.log(" -> TIME: " + calculateTimeScore(bestPlayer, gameStartTime, settings) * settings.timeScoreWeight) + " (last scheduled end: " + bestPlayer.lastScheduledEndTimestamp + ")";
+    console.log(" -> TIME: " + (calculateTimeScore(bestPlayer, gameStartTime, settings) * settings.timeScoreWeight) + " (last scheduled end: " + bestPlayer.lastScheduledEndTimestamp + ")");
     console.log(" -> DIVERSITY: " + calculateDiversityScore(bestPlayer, gameStartTime, selectedPlayers, settings) * settings.diversityScoreWeight);
     console.log(" -> BALANCE: " + calculateBalanceScore(bestPlayer, selectedPlayers, settings) * settings.balanceScoreWeight);
     console.log(" -> SKILL: " + calculateSkillScore(bestPlayer, selectedPlayers, settings) * settings.skillScoreWeight);
