@@ -132,7 +132,7 @@ export default function Home() {
         return; // Players are already loaded, don't overwrite
       }
 
-      let data = await fetch('./registered-players.txt');
+      let data = await fetch('./registered-players-aug11.txt');
       let text = await data.text();
 
       activePlayers = [];

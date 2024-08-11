@@ -7,7 +7,7 @@ Richard Chen, 3
 Emily Cheng, 3
 Edward Choi, 3
 Clemence Chu, 3
-Shuyi Chu, 1
+Shu Yi Chu, 1
 Kevin Ding, 3
 Owen fu, 4
 Michael He, 3
@@ -49,3 +49,9 @@ Justin Ko, 3
 Tony Cui, 3
 Carrie Liang, 2
 Jinzhen Dou, 2
+Yen Zhang Huang, 2
+Matthew Su, 3
+Lei Huang, 2
+Dexin Chen, 2
+Peter Liu, 3
+Eugenia, 2
