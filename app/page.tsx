@@ -584,7 +584,7 @@ export default function Home() {
             Clear session
           </button>
 
-          <button onClick={() => resetDebugTime}>
+          <button onClick={resetDebugTime}>
             Reset debug time
           </button>
 
