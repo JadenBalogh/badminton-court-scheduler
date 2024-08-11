@@ -197,15 +197,19 @@ function generatePlayerQueue(players: Player[]) {
 }
 
 function generateQueue(players: Player[], courts: Court[], queueLength: number, settings: SessionSettings) {
-  console.log("Generating court queue...");
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log("Generating court queue...");
+  }
 
   let result: Court[] = []; // Generated queue of courts
 
   // Step 1: Sort players by time played (longest wait first)
   let playerQueue: Player[] = generatePlayerQueue(players);
 
-  console.log("Computed time-based player queue:");
-  console.log(structuredClone(playerQueue));
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log("Computed time-based player queue:");
+    console.log(structuredClone(playerQueue));
+  }
 
   if (playerQueue.length < 4) {
     console.log("Failed to generate queue. Not enough players.");
@@ -227,8 +231,10 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
     return result;
   }
 
-  console.log("Computed estimated times remaining per active court:");
-  console.log(structuredClone(startOffsets));
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log("Computed estimated times remaining per active court:");
+    console.log(structuredClone(startOffsets));
+  }
 
   let scheduledGameTime = Date.now();
   playerQueue.forEach(player => {
@@ -265,8 +271,10 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
     result.push(court);
   }
 
-  console.log("Generated court queue:");
-  console.log(structuredClone(result));
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log("Generated court queue:");
+    console.log(structuredClone(result));
+  }
 
   return result;
 }
