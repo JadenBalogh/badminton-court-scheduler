@@ -564,14 +564,17 @@ export default function Home() {
 
           <div>
             {activePlayersState.map((player, idx) =>
-              <div key={idx}>
-                <input
-                  type="checkbox"
-                  value={player.name}
-                  checked={isPlayerEnabled(player.name)}
-                  onChange={(event) => onPlayerChecked(event)}
-                />
-                {' '}{player.name}
+              <div className="flex flex-col" key={idx}>
+                <div className="font-semibold">
+                  <input
+                    type="checkbox"
+                    value={player.name}
+                    checked={isPlayerEnabled(player.name)}
+                    onChange={(event) => onPlayerChecked(event)}
+                  />
+                  {' '}{player.name}
+                </div>
+                <p className="text-sm pl-6">{"-> (Played: " + player.gamesPlayed + ")"}</p>
               </div>
             )}
           </div>
