@@ -186,13 +186,17 @@ export default function Home() {
   }
 
   function getPlayerData(username: string) {
-    return playerDatas.find(data => data.username == username);
+    return playerDatas.find(data => data.username === username);
   }
 
   function onPlayerChecked(event: ChangeEvent<HTMLInputElement>) {
     setPlayerEnabled(event.target.value, event.target.checked);
     generateCourtQueue();
     refreshState();
+  }
+
+  function getActivePlayer(username: string) {
+    return activePlayers.find(player => player.username === username);
   }
 
   function addActivePlayer(name: string) {
@@ -264,7 +268,7 @@ export default function Home() {
     for (let i = 0; i < sessionSettings.courtCount; i++) {
       emptyCourts.push({
         id: i,
-        players: [],
+        playerIDs: [],
         startTime: 0
       });
     }
@@ -275,9 +279,14 @@ export default function Home() {
   // Starts a specified game at the given court index
   function startGame(index: number, court: Court) {
     activeCourts[index].startTime = Date.now();
-    activeCourts[index].players = court.players;
+    activeCourts[index].playerIDs = [...court.playerIDs];
 
-    for (let player of activeCourts[index].players) {
+    for (let playerID of activeCourts[index].playerIDs) {
+      let player = getActivePlayer(playerID);
+      if (!player) {
+        continue;
+      }
+
       player.isPlaying = true;
     }
 
@@ -285,20 +294,28 @@ export default function Home() {
   }
 
   function finishGame(index: number) {
-    for (let player of activeCourts[index].players) {
+    for (let playerID of activeCourts[index].playerIDs) {
+      let player = getActivePlayer(playerID);
+      if (!player) {
+        continue;
+      }
+
       player.isPlaying = false;
       player.lastPlayedTimestamp = Date.now();
-      activeCourts[index].players.filter(p => p.username !== player.username).forEach((p) => {
-        player.lastPartneredTimestamp[p.username] = Date.now();
+      activeCourts[index].playerIDs.filter(otherID => otherID !== playerID).forEach((otherID) => {
+        let otherPlayer = getActivePlayer(otherID);
+        if (otherPlayer) {
+          otherPlayer.lastPartneredTimestamp[playerID] = Date.now();
+        }
       });
     }
 
-    activeCourts[index].players = [];
+    activeCourts[index].playerIDs = [];
   }
 
   function fillEmptyCourts() {
     for (let i = 0; i < activeCourts.length; i++) {
-      if (activeCourts[i].players.length === 0 && courtQueue[i]) {
+      if (activeCourts[i].playerIDs.length === 0 && courtQueue[i]) {
         startGame(i, courtQueue[i]);
       }
     }
@@ -365,9 +382,9 @@ export default function Home() {
   function onPlayerSkipped(court: Court, player: Player) {
     console.log("Skipping player: " + player.name);
 
-    let skippedIndex = court.players.indexOf(player);
+    let skippedIndex = court.playerIDs.indexOf(player.username);
     let replacementPlayer = getBestPlayer(court, skippedIndex);
-    court.players.splice(skippedIndex, 1, replacementPlayer);
+    court.playerIDs.splice(skippedIndex, 1, replacementPlayer.username);
     startGame(court.id, court);
 
     player.isPlaying = false;
@@ -417,6 +434,7 @@ export default function Home() {
 
         <ActiveCourts
           courts={activeCourtsState}
+          players={activePlayersState}
           handleGameFinished={handleGameFinished}
           handleSkipPlayer={handleSkipPlayer}
         />
@@ -433,6 +451,7 @@ export default function Home() {
               <CourtDisplay
                 isActive={false}
                 court={court}
+                players={activePlayersState}
                 handleSkipPlayer={() => { }}
               />
               <p className="text-sm">{getWaitTimeText(court)}</p>

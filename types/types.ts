@@ -1,7 +1,7 @@
 export type Player = {
   // Static variables
   name: string;
-  username: string;
+  username: string; // Used as an ID for this player. Careful: not checked for uniqueness.
   skillLevel: number;
 
   // Dynamic session variables
@@ -21,7 +21,7 @@ export type PlayerData = {
 
 export type Court = {
   id: number;
-  players: Player[];
+  playerIDs: string[];
   startTime: number;
 }
 

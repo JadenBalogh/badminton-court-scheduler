@@ -1,6 +1,16 @@
 import { Player, Court, SessionSettings } from '../types/types'
 
 const ADVANCED_DEBUG_LOGGING = false; // Enable advanced logging
+const DEFAULT_PLAYER: Player = {
+  name: "",
+  username: "",
+  skillLevel: 0,
+  isEnabled: false,
+  isPlaying: false,
+  lastPlayedTimestamp: 0,
+  lastPartneredTimestamp: {},
+  lastScheduledEndTimestamp: 0
+}
 
 // Returns the normalized TIME score for the given player. 0 minute wait = 0.0 time score. 30 minute wait = 1.0 time score.
 function calculateTimeScore(player: Player, gameStartTime: number, settings: SessionSettings) {
@@ -64,8 +74,8 @@ function calculateTotalScore(player: Player, gameStartTime: number, otherPlayers
   return timeScore + diversityScore + balance + skill;
 }
 
-// Returns the index of best matching player in the queue based on TIME, DIVERSITY and BALANCE heuristics
-function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selectedPlayers: Player[], settings: SessionSettings) {
+// Returns the best matching player in the queue based on the scheduling heuristics
+function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selectedPlayers: Player[], settings: SessionSettings): Player {
   // Consider only players that haven't already been selected as part of this team
   let candidates = playerQueue.slice(0, playerQueue.length - selectedPlayers.length);
 
@@ -105,8 +115,8 @@ function schedulePlayer(playerQueue: Player[], player: Player, gameStartTime: nu
   player.lastScheduledEndTimestamp = gameStartTime + settings.expectedGameDuration;
 }
 
-// Returns a list of players created using the team balancing algorithm. Format: [T1P1, T2P1, T1P2, T2P2] (T = Team, P = Player)
-function assignCourtPlayers(playerQueue: Player[], gameStartTime: number, settings: SessionSettings) {
+// Returns a list of playerIDs created using the team balancing algorithm. Format: [T1P1, T2P1, T1P2, T2P2] (T = Team, P = Player)
+function assignCourtPlayers(playerQueue: Player[], gameStartTime: number, settings: SessionSettings): string[] {
   if (ADVANCED_DEBUG_LOGGING) {
     console.log("Picking Team 1, Player 1...");
   }
@@ -152,7 +162,15 @@ function assignCourtPlayers(playerQueue: Player[], gameStartTime: number, settin
     console.log(structuredClone(team2Player2));
   }
 
-  return [team1Player1, team1Player2, team2Player1, team2Player2];
+  return [team1Player1.username, team1Player2.username, team2Player1.username, team2Player2.username];
+}
+
+function getPlayer(username: string, players: Player[]): Player {
+  let player = players.find((p) => p.username === username);
+  if (!player) {
+    console.log("ERROR: Failed to find player by username: (" + username + "). Scheduling will likely break.");
+  }
+  return player ?? DEFAULT_PLAYER;
 }
 
 // Returns a priority-sorted player queue from the given list of players
@@ -215,7 +233,7 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
 
     let court: Court = {
       id: i,
-      players: [],
+      playerIDs: [],
       startTime: scheduledGameTime + startOffsets[courtIndex]
     };
 
@@ -226,7 +244,7 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
       console.log("Scheduling Court " + i + " at time " + scheduledGameTime + "...");
     }
 
-    court.players = assignCourtPlayers(playerQueue, scheduledGameTime, settings);
+    court.playerIDs = assignCourtPlayers(playerQueue, scheduledGameTime, settings);
     result.push(court);
   }
 
@@ -238,37 +256,38 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
 
 function getNextCourt(queue: Court[], players: Player[], settings: SessionSettings) {
   let nextCourt: Court = { ...queue[0] };
-  if (nextCourt && nextCourt.players.every(p => !p.isPlaying)) {
-    return nextCourt; // The next court in the queue is valid, immediately return it
+  if (nextCourt && nextCourt.playerIDs.every(playerID => !getPlayer(playerID, players).isPlaying)) {
+    return nextCourt; // No scheduled players are currently on a court, so the scheduled court is valid. Return immediately.
   }
 
   // Generate the next court using the balancing algorithm, force-excluding players who are already playing
   let playerQueue = generatePlayerQueue(players).filter(p => !p.isPlaying);
 
   if (playerQueue.length < 4) {
-    nextCourt.players = [];
+    nextCourt.playerIDs = [];
     return nextCourt;
   }
 
-  nextCourt.players = assignCourtPlayers(playerQueue, Date.now(), settings);
+  nextCourt.playerIDs = assignCourtPlayers(playerQueue, Date.now(), settings);
   return nextCourt;
 }
 
 function getBestPlayer(court: Court, index: number, players: Player[], settings: SessionSettings) {
   let playerQueue = generatePlayerQueue(players).filter(p => !p.isPlaying);
-  let courtPlayers: Player[];
+  let courtPlayerIDs: string[];
 
   // Re-order the court so that teams are maintained but the open slot is always last
   if (index === 0) {
-    courtPlayers = [court.players[3], court.players[2], court.players[1]];
+    courtPlayerIDs = [court.playerIDs[3], court.playerIDs[2], court.playerIDs[1]];
   } else if (index === 1) {
-    courtPlayers = [court.players[2], court.players[3], court.players[0]];
+    courtPlayerIDs = [court.playerIDs[2], court.playerIDs[3], court.playerIDs[0]];
   } else if (index === 2) {
-    courtPlayers = [court.players[1], court.players[0], court.players[3]];
+    courtPlayerIDs = [court.playerIDs[1], court.playerIDs[0], court.playerIDs[3]];
   } else {
-    courtPlayers = [court.players[0], court.players[1], court.players[2]];
+    courtPlayerIDs = [court.playerIDs[0], court.playerIDs[1], court.playerIDs[2]];
   }
 
+  let courtPlayers = courtPlayerIDs.map((playerID) => getPlayer(playerID, players));
   return assignBestPlayer(playerQueue, Date.now(), courtPlayers, settings);
 }
 
