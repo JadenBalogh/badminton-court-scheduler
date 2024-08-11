@@ -7,7 +7,7 @@ export type Player = {
   // Dynamic session variables
   isEnabled: boolean; // Whether this player will be considered in the algorithm
   isPlaying: boolean; // Whether this player is currently playing on a court
-  lastPlayedTimestamp: number; // Timestamp since the last game ended
+  lastPlayedTimestamp: number; // Timestamp the last game ended
   lastPartneredTimestamp: { [username: string]: number }; // Timestamp this player last finished playing with each other player
 
   // Transient algorithm variables
