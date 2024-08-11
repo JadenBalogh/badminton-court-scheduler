@@ -249,6 +249,15 @@ export default function Home() {
     }
   }
 
+  function shuffleActivePlayers() {
+    for (let i = activePlayers.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      let temp = activePlayers[i];
+      activePlayers[i] = activePlayers[j];
+      activePlayers[j] = temp;
+    }
+  }
+
   function getStartDelay(court: Court) {
     let startDelayMS = court.startTime - Scheduler.getCurrentTime();
     let startDelayMins = startDelayMS / 1000 / 60; // Convert ms to mins
@@ -365,6 +374,7 @@ export default function Home() {
   function startSession() {
     resetPlayers();
     resetCourts();
+    shuffleActivePlayers();
     generateCourtQueue();
     fillEmptyCourts();
     generateCourtQueue();
