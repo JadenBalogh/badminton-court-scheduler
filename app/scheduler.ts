@@ -9,6 +9,8 @@ const DEFAULT_PLAYER: Player = {
   isPlaying: false,
   lastPlayedTimestamp: 0,
   lastPartneredTimestamp: {},
+  gamesPlayed: 0,
+  timesPartnered: {},
   lastScheduledEndTimestamp: 0
 }
 

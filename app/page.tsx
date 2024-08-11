@@ -13,6 +13,7 @@ const MAX_TEAM_SKILL_VARIANCE = 0;
 const MAX_INDIVIDUAL_SKILL_VARIANCE = 2;
 
 const EXPECTED_GAME_DURATION = 600000; // 10 minutes in milliseconds
+const EXPECTED_GAME_DURATION_VARIANCE = 300000; // 5 minutes in milliseconds
 const MAX_TIME_SCORE_WAIT_TIME = 1800000; // 30 minutes in milliseconds
 const MAX_DIVERSITY_SCORE_PLAY_DELAY = 3600000; // 1 hour in milliseconds
 
@@ -216,6 +217,8 @@ export default function Home() {
       isPlaying: false,
       lastPlayedTimestamp: 0,
       lastPartneredTimestamp: {},
+      gamesPlayed: 0,
+      timesPartnered: {},
       lastScheduledEndTimestamp: 0
     };
 
@@ -259,11 +262,13 @@ export default function Home() {
       player.isPlaying = false;
       player.lastPlayedTimestamp = 0;
       player.lastPartneredTimestamp = {};
+      player.gamesPlayed = 0;
+      player.timesPartnered = {};
       player.lastScheduledEndTimestamp = 0;
     }
   }
 
-  function clearCourts() {
+  function resetCourts() {
     let emptyCourts: Court[] = [];
     for (let i = 0; i < sessionSettings.courtCount; i++) {
       emptyCourts.push({
@@ -273,12 +278,11 @@ export default function Home() {
       });
     }
     activeCourts = [...emptyCourts];
-    refreshState();
   }
 
   // Starts a specified game at the given court index
-  function startGame(index: number, court: Court) {
-    activeCourts[index].startTime = Date.now();
+  function startGame(index: number, court: Court, startTime: number, debug: boolean) {
+    activeCourts[index].startTime = startTime;
     activeCourts[index].playerIDs = [...court.playerIDs];
 
     for (let playerID of activeCourts[index].playerIDs) {
@@ -290,10 +294,16 @@ export default function Home() {
       player.isPlaying = true;
     }
 
-    queueRefresh(NEW_COURT_DURATION + 100);
+    if (!debug) {
+      queueRefresh(NEW_COURT_DURATION + 100);
+    }
   }
 
-  function finishGame(index: number) {
+  function finishGame(index: number, finishTime: number) {
+    if (activeCourts[index].playerIDs.length === 0) {
+      return;
+    }
+
     for (let playerID of activeCourts[index].playerIDs) {
       let player = getActivePlayer(playerID);
       if (!player) {
@@ -301,11 +311,13 @@ export default function Home() {
       }
 
       player.isPlaying = false;
-      player.lastPlayedTimestamp = Date.now();
+      player.lastPlayedTimestamp = finishTime;
+      player.gamesPlayed++;
       activeCourts[index].playerIDs.filter(otherID => otherID !== playerID).forEach((otherID) => {
         let otherPlayer = getActivePlayer(otherID);
         if (otherPlayer) {
-          otherPlayer.lastPartneredTimestamp[playerID] = Date.now();
+          otherPlayer.lastPartneredTimestamp[playerID] = finishTime;
+          otherPlayer.timesPartnered[playerID] = otherPlayer.timesPartnered[playerID] + 1 || 1;
         }
       });
     }
@@ -316,7 +328,7 @@ export default function Home() {
   function fillEmptyCourts() {
     for (let i = 0; i < activeCourts.length; i++) {
       if (activeCourts[i].playerIDs.length === 0 && courtQueue[i]) {
-        startGame(i, courtQueue[i]);
+        startGame(i, courtQueue[i], Date.now(), false);
       }
     }
   }
@@ -347,10 +359,17 @@ export default function Home() {
 
   function onSessionStarted() {
     resetPlayers();
-    clearCourts();
+    resetCourts();
     generateCourtQueue();
     fillEmptyCourts();
     generateCourtQueue();
+    refreshState();
+  }
+
+  function clearSession() {
+    resetPlayers();
+    activeCourts = [];
+    courtQueue = [];
     refreshState();
   }
 
@@ -364,8 +383,8 @@ export default function Home() {
   }
 
   function onGameFinished(index: number) {
-    finishGame(index);
-    startGame(index, getNextCourt());
+    finishGame(index, Date.now());
+    startGame(index, getNextCourt(), Date.now(), false);
     generateCourtQueue();
     refreshState();
   }
@@ -385,7 +404,7 @@ export default function Home() {
     let skippedIndex = court.playerIDs.indexOf(player.username);
     let replacementPlayer = getBestPlayer(court, skippedIndex);
     court.playerIDs.splice(skippedIndex, 1, replacementPlayer.username);
-    startGame(court.id, court);
+    startGame(court.id, court, Date.now(), false);
 
     player.isPlaying = false;
     player.lastPlayedTimestamp = 0; // Set the skipped player to the max wait time to ensure being prioritized next game
@@ -403,6 +422,49 @@ export default function Home() {
     console.log(activeCourts);
     console.log("Court Queue:");
     console.log(courtQueue);
+  }
+
+  // Test algorithm:
+  // 1. If the sample queue is full, remove the oldest court from the queue and set the current time to that timestamp
+  // 2. Start a game and add to the sample queue
+  function runSampleGames(count: number) {
+    let courtSampleQueue = [];
+    let courtIdx = -1;
+    let currentTime = Date.now();
+
+    clearSession();
+    resetCourts();
+    generateCourtQueue();
+
+    for (let i = 0; i < count; i++) {
+      if (courtSampleQueue.length >= activeCourts.length) {
+        let sampleCourt = courtSampleQueue.splice(0, 1)[0];
+        courtIdx = sampleCourt.courtIdx;
+        currentTime = sampleCourt.gameEndTime;
+        finishGame(courtIdx, currentTime);
+      } else {
+        courtIdx++;
+      }
+
+      let gameEndTime = currentTime += EXPECTED_GAME_DURATION + (Math.random() * 2 * EXPECTED_GAME_DURATION_VARIANCE) - EXPECTED_GAME_DURATION_VARIANCE;
+      courtSampleQueue.push({ courtIdx, gameEndTime });
+      startGame(courtIdx, getNextCourt(), currentTime, true);
+      generateCourtQueue();
+    }
+
+    for (let activePlayer of activePlayers) {
+      printPlayerStats(activePlayer);
+    }
+
+    clearSession();
+  }
+
+  function printPlayerStats(player: Player) {
+    console.log(player.name + ":");
+    console.log({
+      gamesPlayed: player.gamesPlayed,
+      timesPartnered: player.timesPartnered
+    });
   }
 
   function handleCheckAllPlayers() {
@@ -494,12 +556,16 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col">
-          <button onClick={printState}>
-            Print the current state!
+          <button onClick={() => runSampleGames(100)}>
+            Sample 100 games
           </button>
 
-          <button onClick={clearCourts}>
-            Clear all courts!
+          <button onClick={clearSession}>
+            Clear session
+          </button>
+
+          <button onClick={printState}>
+            Print the current state
           </button>
         </div>
       </div>

@@ -9,6 +9,8 @@ export type Player = {
   isPlaying: boolean; // Whether this player is currently playing on a court
   lastPlayedTimestamp: number; // Timestamp the last game ended
   lastPartneredTimestamp: { [username: string]: number }; // Timestamp this player last finished playing with each other player
+  gamesPlayed: number;
+  timesPartnered: { [username: string]: number };
 
   // Transient algorithm variables
   lastScheduledEndTimestamp: number; // The hypothetical last played time in the queue, based on last scheduled time
