@@ -96,10 +96,10 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
     console.log("Evaluating candidates:")
     console.log(candidates.map((player) => {
       let scoresArray = [];
-      scoresArray.push("TIME: " + calculateTimeScore(bestPlayer, gameStartTime, settings) * settings.timeScoreWeight);
-      scoresArray.push("DIVERSITY: " + calculateDiversityScore(bestPlayer, gameStartTime, selectedPlayers, settings) * settings.diversityScoreWeight);
-      scoresArray.push("BALANCE: " + calculateBalanceScore(bestPlayer, selectedPlayers, settings) * settings.balanceScoreWeight);
-      scoresArray.push("SKILL: " + calculateSkillScore(bestPlayer, selectedPlayers, settings) * settings.skillScoreWeight);
+      scoresArray.push("TIME: " + calculateTimeScore(player, gameStartTime, settings) * settings.timeScoreWeight);
+      scoresArray.push("DIVERSITY: " + calculateDiversityScore(player, gameStartTime, selectedPlayers, settings) * settings.diversityScoreWeight);
+      scoresArray.push("BALANCE: " + calculateBalanceScore(player, selectedPlayers, settings) * settings.balanceScoreWeight);
+      scoresArray.push("SKILL: " + calculateSkillScore(player, selectedPlayers, settings) * settings.skillScoreWeight);
       return [player.name, calculateTotalScore(player, gameStartTime, selectedPlayers, settings), scoresArray, player];
     }).sort((a, b) => Number(b[1]) - Number(a[1])));
 
