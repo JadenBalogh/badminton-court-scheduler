@@ -1,5 +1,6 @@
 import { Court, Player } from '../types/types';
 import CourtDisplay from "./courtDisplay";
+import { getCurrentTime } from './page';
 
 type ActiveCourtsProps = {
   courts: Court[];
@@ -10,7 +11,7 @@ type ActiveCourtsProps = {
 
 export default function ActiveCourts({ courts, players, handleGameFinished, handleSkipPlayer }: ActiveCourtsProps) {
   function getPlayTime(court: Court) {
-    let playTimeMS = Date.now() - court.startTime;
+    let playTimeMS = getCurrentTime() - court.startTime;
     let playTimeMins = playTimeMS / 1000 / 60; // Convert ms to mins
     return Math.round(playTimeMins);
   }

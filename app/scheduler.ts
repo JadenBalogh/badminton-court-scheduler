@@ -1,4 +1,5 @@
 import { Player, Court, SessionSettings } from '../types/types'
+import { getCurrentTime } from './page';
 
 const ADVANCED_DEBUG_LOGGING = false; // Enable advanced logging
 const DEFAULT_PLAYER: Player = {
@@ -234,7 +235,7 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
     return a.startTime - b.startTime;
   });
   let startOffsets = courtQueue.map(court => {
-    let playedDuration = Date.now() - court.startTime;
+    let playedDuration = getCurrentTime() - court.startTime;
     return settings.expectedGameDuration - playedDuration;
   });
 
@@ -248,7 +249,7 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
     console.log(structuredClone(startOffsets));
   }
 
-  let scheduledGameTime = Date.now();
+  let scheduledGameTime = getCurrentTime();
   playerQueue.forEach(player => {
     let scheduledEnd = player.lastPlayedTimestamp;
     if (player.isPlaying) {
@@ -305,7 +306,7 @@ function getNextCourt(queue: Court[], players: Player[], settings: SessionSettin
     return nextCourt;
   }
 
-  nextCourt.playerIDs = assignCourtPlayers(playerQueue, players, Date.now(), settings);
+  nextCourt.playerIDs = assignCourtPlayers(playerQueue, players, getCurrentTime(), settings);
   return nextCourt;
 }
 
@@ -325,7 +326,7 @@ function getBestPlayer(court: Court, index: number, players: Player[], settings:
   }
 
   let courtPlayers = courtPlayerIDs.map((playerID) => getActivePlayer(playerID, players));
-  return assignBestPlayer(playerQueue, Date.now(), courtPlayers, settings);
+  return assignBestPlayer(playerQueue, getCurrentTime(), courtPlayers, settings);
 }
 
 export const Scheduler = {

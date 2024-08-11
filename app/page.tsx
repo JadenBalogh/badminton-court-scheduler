@@ -37,6 +37,11 @@ let activePlayers: Player[] = [];
 let activeCourts: Court[] = [];
 let courtQueue: Court[] = [];
 
+export function getCurrentTime(): number {
+  let debugTimeOffset = Number.parseInt(window.sessionStorage.getItem("debugTimeOffset") ?? "0");
+  return Date.now() + debugTimeOffset;
+}
+
 export default function Home() {
   const [sessionSettings, setSessionSettings] = useState<SessionSettings>({
     courtCount: COURT_COUNT,
@@ -86,6 +91,7 @@ export default function Home() {
     activePlayers = JSON.parse(window.sessionStorage.getItem("activePlayers") ?? "[]");
     activeCourts = JSON.parse(window.sessionStorage.getItem("activeCourts") ?? "[]");
     courtQueue = JSON.parse(window.sessionStorage.getItem("courtQueue") ?? "[]");
+
     refreshState();
   }
 
@@ -247,7 +253,7 @@ export default function Home() {
   }
 
   function getStartDelay(court: Court) {
-    let startDelayMS = court.startTime - Date.now();
+    let startDelayMS = court.startTime - getCurrentTime();
     let startDelayMins = startDelayMS / 1000 / 60; // Convert ms to mins
     return Math.round(startDelayMins);
   }
@@ -330,7 +336,7 @@ export default function Home() {
   function fillEmptyCourts() {
     for (let i = 0; i < activeCourts.length; i++) {
       if (activeCourts[i].playerIDs.length === 0 && courtQueue[i]) {
-        startGame(i, courtQueue[i], Date.now(), false);
+        startGame(i, courtQueue[i], getCurrentTime(), false);
       }
     }
   }
@@ -385,8 +391,8 @@ export default function Home() {
   }
 
   function onGameFinished(index: number) {
-    finishGame(index, Date.now());
-    startGame(index, getNextCourt(), Date.now(), false);
+    finishGame(index, getCurrentTime());
+    startGame(index, getNextCourt(), getCurrentTime(), false);
     generateCourtQueue();
     refreshState();
   }
@@ -406,7 +412,7 @@ export default function Home() {
     let skippedIndex = court.playerIDs.indexOf(player.username);
     let replacementPlayer = getBestPlayer(court, skippedIndex);
     court.playerIDs.splice(skippedIndex, 1, replacementPlayer.username);
-    startGame(court.id, court, Date.now(), false);
+    startGame(court.id, court, getCurrentTime(), false);
 
     player.isPlaying = false;
     player.lastPlayedTimestamp = 0; // Set the skipped player to the max wait time to ensure being prioritized next game
@@ -432,7 +438,7 @@ export default function Home() {
   function runSampleGames(count: number) {
     let courtSampleQueue = [];
     let courtIdx = -1;
-    let currentTime = Date.now();
+    let currentTime = getCurrentTime();
 
     clearSession();
     resetCourts();
@@ -468,6 +474,17 @@ export default function Home() {
       gamesPlayed: player.gamesPlayed,
       timesPartnered: player.timesPartnered
     });
+  }
+
+  function resetDebugTime() {
+    window.sessionStorage.setItem("debugTimeOffset", "0");
+    refreshState();
+  }
+
+  function addDebugTime(amount: number) {
+    let debugTimeOffset = Number.parseInt(window.sessionStorage.getItem("debugTimeOffset") ?? "0");
+    window.sessionStorage.setItem("debugTimeOffset", (debugTimeOffset + amount).toString());
+    refreshState();
   }
 
   function handleCheckAllPlayers() {
@@ -565,6 +582,14 @@ export default function Home() {
 
           <button onClick={clearSession}>
             Clear session
+          </button>
+
+          <button onClick={() => resetDebugTime}>
+            Reset debug time
+          </button>
+
+          <button onClick={() => addDebugTime(300000)}>
+            Increment debug time by 5 minutes
           </button>
 
           <button onClick={printState}>
