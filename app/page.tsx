@@ -7,6 +7,8 @@ import CourtDisplay from './courtDisplay';
 import { Scheduler } from './scheduler';
 import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 
+const SHOW_DEBUG_OPTIONS = false;
+
 const COURT_COUNT = 3;
 const QUEUE_LENGTH = 6;
 const MAX_TEAM_SKILL_VARIANCE = 1;
@@ -575,7 +577,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex flex-col">
+        {SHOW_DEBUG_OPTIONS ? <div className="flex flex-col">
           <button onClick={() => runSampleGames(100)}>
             Sample 100 games
           </button>
@@ -595,7 +597,7 @@ export default function Home() {
           <button onClick={printState}>
             Print the current state
           </button>
-        </div>
+        </div> : <></>}
       </div>
 
       <div className="flex items-center justify-center text-xs w-full h-10 bg-slate-50 mt-8 gap-x-4">
