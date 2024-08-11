@@ -100,51 +100,8 @@ export default function Home() {
   // Load player data, load registered players and initialize empty courts
   useEffect(() => {
     loadSession();
-    loadPlayerData();
-    loadRegisteredPlayers();
-
-    async function loadPlayerData() {
-      if (playerDatas.length > 0) {
-        return; // Player data is already loaded, don't overwrite
-      }
-
-      let data = await fetch('./player-data.txt');
-      let text = await data.text();
-
-      playerDatas = [];
-      let lines = text.split(/[\r\n]+/);
-
-      for (let line of lines) {
-        let fields = line.split(',');
-        let player: PlayerData = {
-          username: toUsername(fields[0]),
-          skillLevel: Number(fields[1])
-        };
-
-        playerDatas.push(player);
-      }
-
-      refreshState();
-    }
-
-    async function loadRegisteredPlayers() {
-      if (activePlayers.length > 0) {
-        return; // Players are already loaded, don't overwrite
-      }
-
-      let data = await fetch('./registered-players-aug11.txt');
-      let text = await data.text();
-
-      activePlayers = [];
-      let lines = text.split(/[\r\n]+/);
-
-      for (let line of lines) {
-        let playerName = line.trim();
-        addActivePlayer(playerName);
-      }
-
-      refreshState();
-    }
+    loadPlayerData(false);
+    loadRegisteredPlayers(false);
   }, []);
 
   // Refresh state every 30 seconds. Ensures timers are always reasonably up to date.
@@ -156,6 +113,49 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, []);
+
+  async function loadPlayerData(force: boolean) {
+    if (!force && playerDatas.length > 0) {
+      return; // Player data is already loaded, don't overwrite
+    }
+
+    let data = await fetch('./player-data.txt');
+    let text = await data.text();
+
+    playerDatas = [];
+    let lines = text.split(/[\r\n]+/);
+
+    for (let line of lines) {
+      let fields = line.split(',');
+      let player: PlayerData = {
+        username: toUsername(fields[0]),
+        skillLevel: Number(fields[1])
+      };
+
+      playerDatas.push(player);
+    }
+
+    refreshState();
+  }
+
+  async function loadRegisteredPlayers(force: boolean) {
+    if (!force && activePlayers.length > 0) {
+      return; // Players are already loaded, don't overwrite
+    }
+
+    let data = await fetch('./registered-players-aug11.txt');
+    let text = await data.text();
+
+    activePlayers = [];
+    let lines = text.split(/[\r\n]+/);
+
+    for (let line of lines) {
+      let playerName = line.trim();
+      addActivePlayer(playerName);
+    }
+
+    refreshState();
+  }
 
   async function awaitConfirm(options: ConfirmDialogOptions, onConfirmed: Callback) {
     setConfirmOptions(options);
@@ -361,13 +361,13 @@ export default function Home() {
   function handleStartSession() {
     awaitConfirm({
       title: "Start session?",
-      desc: "Starting the session will clear all existing player data.",
+      desc: "Starting the session will reset all games and player stats.",
       confirmText: "Start",
       cancelText: "Cancel"
-    }, onSessionStarted);
+    }, startSession);
   }
 
-  function onSessionStarted() {
+  function startSession() {
     resetPlayers();
     resetCourts();
     generateCourtQueue();
@@ -376,9 +376,26 @@ export default function Home() {
     refreshState();
   }
 
+  function handleClearSession() {
+    awaitConfirm({
+      title: "Clear session?",
+      desc: "Clearing the session will fully wipe and reload all player data.",
+      confirmText: "Confirm",
+      cancelText: "Cancel"
+    }, clearSession);
+  }
+
   function clearSession() {
-    resetPlayers();
+    loadPlayerData(true);
+    loadRegisteredPlayers(true);
     activeCourts = [];
+    courtQueue = [];
+    refreshState();
+  }
+
+  function resetSession() {
+    resetPlayers();
+    resetCourts();
     courtQueue = [];
     refreshState();
   }
@@ -442,8 +459,7 @@ export default function Home() {
     let courtIdx = -1;
     let currentTime = getCurrentTime();
 
-    clearSession();
-    resetCourts();
+    resetSession();
     generateCourtQueue();
 
     for (let i = 0; i < count; i++) {
@@ -467,7 +483,7 @@ export default function Home() {
       printPlayerStats(activePlayer);
     }
 
-    clearSession();
+    resetSession();
   }
 
   function printPlayerStats(player: Player) {
@@ -549,6 +565,12 @@ export default function Home() {
           <h2 className={`text-2xl font-semibold`}>
             Active Players
           </h2>
+
+          <button
+            className="bg-red-500 hover:bg-red-700 text-white font-bold w-40 p-3 rounded"
+            onClick={handleClearSession}>
+            Clear Session
+          </button>
 
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-40 p-3 rounded"
