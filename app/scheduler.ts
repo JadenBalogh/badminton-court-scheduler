@@ -45,7 +45,7 @@ function calculateDiversityScore(player: Player, gameStartTime: number, otherPla
 // Returns the normalized BALANCE score for the given player. Skill variance more than maxTeamSkillVariance beyond the target level = 0.0 skill score. Exact skill match = 1.0 skill score.
 function calculateBalanceScore(player: Player, otherPlayers: Player[], settings: SessionSettings) {
   if (otherPlayers.length < 2) {
-    return 0; // Skill score can only be calculated when at least one player has been picked on each team.
+    return 0; // Balance score can only be calculated when at least one player has been picked on each team.
   }
 
   let targetSkillLevel;
@@ -66,7 +66,7 @@ function calculateBalanceScore(player: Player, otherPlayers: Player[], settings:
 // Returns the normalized SKILL score for the given player. Skill variance more than maxIndividualSkillVariance beyond the target level = 0.0 skill score. Exact skill match = 1.0 skill score.
 function calculateSkillScore(player: Player, otherPlayers: Player[], settings: SessionSettings) {
   if (otherPlayers.length > 1) {
-    return 0; // Skill score can only be calculated when at least one player has been picked on each team.
+    return 0; // Skill score can only be calculated for the first player picked on the second team.
   }
 
   let targetSkillLevel = otherPlayers[0].skillLevel;
@@ -92,6 +92,11 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
   let skillFilterResults = candidates.filter(player => calculateBalanceScore(player, selectedPlayers, settings) + calculateSkillScore(player, selectedPlayers, settings) > 0);
   if (skillFilterResults.length > 0) {
     candidates = skillFilterResults; // Only apply the skill filter if any valid players are left
+  } else {
+    console.log("Warning!! Unable to find suitable player for the following team:");
+    console.log(selectedPlayers);
+    console.log("The available candidates were:");
+    console.log(candidates);
   }
 
   // Reduce the candidates down to the highest scoring player
