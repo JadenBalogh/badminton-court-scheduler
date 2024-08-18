@@ -11,8 +11,8 @@ const SHOW_DEBUG_OPTIONS = false;
 
 const COURT_COUNT = 3;
 const QUEUE_LENGTH = 6;
-const MAX_TEAM_SKILL_VARIANCE = 1;
-const MAX_INDIVIDUAL_SKILL_VARIANCE = 2;
+const MAX_TEAM_SKILL_VARIANCE = 2;
+const MAX_INDIVIDUAL_SKILL_VARIANCE = 3;
 
 const EXPECTED_GAME_DURATION = 600000; // 10 minutes in milliseconds
 const EXPECTED_GAME_DURATION_VARIANCE = 300000; // 5 minutes in milliseconds
@@ -138,7 +138,7 @@ export default function Home() {
       return; // Players are already loaded, don't overwrite
     }
 
-    let data = await fetch('./registered-players-aug11.txt');
+    let data = await fetch('./registered-players-aug18.txt');
     let text = await data.text();
 
     activePlayers = [];
