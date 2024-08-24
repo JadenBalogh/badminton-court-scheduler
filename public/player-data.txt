@@ -20,7 +20,7 @@ Lucia Huang, 3
 Zhena Huang, 5
 Felicia Jiang, 7
 Yazhao Jin, 4
-Wey Leong, 4
+Wey Leong, 3
 Raymond Leung, 1
 Hao Li, 5
 Sharlene Liao, 7
@@ -36,7 +36,7 @@ Chensheng Xu, 6
 Yang Yang, 6
 Jack Yiu, 6
 Kelly Zhang, 4
-Yong Zhang, 4
+Yong Zhang, 3
 Robin Zhang, 6
 Jingyi Zhou, 3
 Ray Zhu, 4
