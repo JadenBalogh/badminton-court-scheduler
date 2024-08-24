@@ -15,9 +15,9 @@ Francis He, 4
 Jensen Ho, 7
 Bingjie Hou, 3
 Tehchin Hsieh, 5
-Jenny Huang, 4
-Lucia MingHsuan Huang, 3
-Zhena Huang, 4
+Jenny Huang, 5
+Lucia Huang, 3
+Zhena Huang, 5
 Felicia Jiang, 7
 Yazhao Jin, 4
 Wey Leong, 4
@@ -40,7 +40,7 @@ Yong Zhang, 4
 Robin Zhang, 6
 Jingyi Zhou, 3
 Ray Zhu, 4
-Nanyi Bi, 4
+Rebecca Bi, 4
 Maggie Mai, 3
 Leonie Chen, 4
 Wesley Burnawan, 6
@@ -55,3 +55,4 @@ Dexin Chen, 6
 Peter Liu, 8
 Eugenia, 4
 Vongvichra Nay, 5
+Alice Lou, 4
