@@ -460,6 +460,7 @@ export default function Home() {
   // 1. If the sample queue is full, remove the oldest court from the queue and set the current time to that timestamp
   // 2. Start a game and add to the sample queue
   function runSampleGames(count: number) {
+    let debugGamesPlayed = [];
     let courtSampleQueue = [];
     let courtIdx = -1;
     let currentTime = Scheduler.getCurrentTime();
@@ -480,9 +481,15 @@ export default function Home() {
       let gameEndTime = currentTime + EXPECTED_GAME_DURATION + Math.floor((Math.random() * 2 * EXPECTED_GAME_DURATION_VARIANCE) + 1) - EXPECTED_GAME_DURATION_VARIANCE;
       courtSampleQueue.push({ courtIdx, gameEndTime });
       courtSampleQueue.sort((a, b) => a.gameEndTime - b.gameEndTime);
-      startGame(courtIdx, getNextCourt(), currentTime, true);
+
+      let nextGame = getNextCourt();
+      debugGamesPlayed.push(getCourtDebugString(nextGame));
+      startGame(courtIdx, nextGame, currentTime, true);
       generateCourtQueue();
     }
+
+    console.log("Simulated Games:");
+    console.log({ debugGamesPlayed });
 
     for (let activePlayer of activePlayers) {
       printPlayerStats(activePlayer);
@@ -497,6 +504,15 @@ export default function Home() {
       gamesPlayed: player.gamesPlayed,
       timesPartnered: player.timesPartnered
     });
+  }
+
+  function getCourtDebugString(court: Court) {
+    let courtPlayers = court.playerIDs.map((playerID) => getActivePlayer(playerID));
+    let team1Player1 = courtPlayers[0] ? courtPlayers[0].name : "[Unknown]";
+    let team2Player1 = courtPlayers[1] ? courtPlayers[1].name : "[Unknown]";
+    let team1Player2 = courtPlayers[2] ? courtPlayers[2].name : "[Unknown]";
+    let team2Player2 = courtPlayers[3] ? courtPlayers[3].name : "[Unknown]";
+    return "" + team1Player1 + " + " + team1Player2 + " vs. " + team2Player1 + " + " + team2Player2;
   }
 
   function resetDebugTime() {
