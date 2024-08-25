@@ -5,9 +5,7 @@ Carrie Liang
 Chensheng Xu
 Michael He
 Hao Li
-Wesley Burnawan
 Francis He
-Jingyi Zhou
 Rebecca Bi
 Tony Lin
 Zhena Huang
@@ -25,3 +23,4 @@ Owen Fu
 Lucia Huang
 Derek Waltho
 Alice Lou
+Justin Ko
