@@ -14,6 +14,17 @@ const DEFAULT_PLAYER: Player = {
   lastScheduledEndTimestamp: 0
 }
 
+function getScoresDebugString(players: Player[], gameStartTime: number, selectedPlayers: Player[], settings: SessionSettings) {
+  return players.map((player) => {
+    let scoresArray = [];
+    scoresArray.push("TIME: " + calculateTimeScore(player, gameStartTime, settings) * settings.timeScoreWeight);
+    scoresArray.push("DIVERSITY: " + calculateDiversityScore(player, gameStartTime, selectedPlayers, settings) * settings.diversityScoreWeight);
+    scoresArray.push("BALANCE: " + calculateBalanceScore(player, selectedPlayers, settings) * settings.balanceScoreWeight);
+    scoresArray.push("SKILL: " + calculateSkillScore(player, selectedPlayers, settings) * settings.skillScoreWeight);
+    return [player.name, calculateTotalScore(player, gameStartTime, selectedPlayers, settings), scoresArray, player];
+  }).sort((a, b) => Number(b[1]) - Number(a[1]));
+}
+
 // Returns the normalized TIME score for the given player. 0 minute wait = 0.0 time score. 30 minute wait = 1.0 time score.
 function calculateTimeScore(player: Player, gameStartTime: number, settings: SessionSettings) {
   if (player.isPlaying) {
@@ -65,12 +76,16 @@ function calculateBalanceScore(player: Player, otherPlayers: Player[], settings:
 
 // Returns the normalized SKILL score for the given player. Skill variance more than maxIndividualSkillVariance beyond the target level = 0.0 skill score. Exact skill match = 1.0 skill score.
 function calculateSkillScore(player: Player, otherPlayers: Player[], settings: SessionSettings) {
-  if (otherPlayers.length > 1) {
-    return 0; // Skill score can only be calculated for the first player picked on the second team.
+  if (otherPlayers.length < 1) {
+    return 0; // Skill score can only be calculated when at least one other player has been picked for this match.
   }
 
-  let targetSkillLevel = otherPlayers[0].skillLevel;
-  let skillVariance = Math.abs(player.skillLevel - targetSkillLevel);
+  let furthestSkillPlayer = otherPlayers.reduce((prev, curr) => {
+    let prevSkillGap = Math.abs(player.skillLevel - prev.skillLevel);
+    let currSkillGap = Math.abs(player.skillLevel - curr.skillLevel);
+    return currSkillGap > prevSkillGap ? curr : prev;
+  });
+  let skillVariance = Math.abs(player.skillLevel - furthestSkillPlayer.skillLevel);
   return 1 - Math.min(skillVariance / (settings.maxIndividualSkillVariance + 1), 1);
 }
 
@@ -88,15 +103,19 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
   // Consider only players that haven't already been selected as part of this team
   let candidates = playerQueue.slice(0, playerQueue.length - selectedPlayers.length);
 
-  // Try to filter out any player that has a 0 balance AND skill score for this team (i.e. outside the allowed skill variances)
-  let skillFilterResults = candidates.filter(player => calculateBalanceScore(player, selectedPlayers, settings) + calculateSkillScore(player, selectedPlayers, settings) > 0);
+  // Try to filter out any player that has an invalid balance or skill score (i.e. outside the allowed skill variances)
+  let skillFilterResults = candidates.filter(player => {
+    let isBalanceValid = selectedPlayers.length === 1 || calculateBalanceScore(player, selectedPlayers, settings) > 0;
+    let isSkillValid = calculateSkillScore(player, selectedPlayers, settings) > 0;
+    return isBalanceValid && isSkillValid;
+  });
   if (skillFilterResults.length > 0) {
     candidates = skillFilterResults; // Only apply the skill filter if any valid players are left
   } else {
     console.log("Warning!! Unable to find suitable player for the following team:");
     console.log(selectedPlayers);
     console.log("The available candidates were:");
-    console.log(candidates);
+    console.log(getScoresDebugString(candidates, gameStartTime, selectedPlayers, settings));
   }
 
   // Reduce the candidates down to the highest scoring player
@@ -106,17 +125,14 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
     return prevPlayerScore >= currPlayerScore ? prevPlayer : currPlayer;
   });
 
+  if (skillFilterResults.length === 0) {
+    console.log("Selected best fallback player:");
+    console.log(bestPlayer);
+  }
+
   if (ADVANCED_DEBUG_LOGGING) {
     console.log("Evaluating candidates:")
-    console.log(candidates.map((player) => {
-      let scoresArray = [];
-      scoresArray.push("TIME: " + calculateTimeScore(player, gameStartTime, settings) * settings.timeScoreWeight);
-      scoresArray.push("DIVERSITY: " + calculateDiversityScore(player, gameStartTime, selectedPlayers, settings) * settings.diversityScoreWeight);
-      scoresArray.push("BALANCE: " + calculateBalanceScore(player, selectedPlayers, settings) * settings.balanceScoreWeight);
-      scoresArray.push("SKILL: " + calculateSkillScore(player, selectedPlayers, settings) * settings.skillScoreWeight);
-      return [player.name, calculateTotalScore(player, gameStartTime, selectedPlayers, settings), scoresArray, player];
-    }).sort((a, b) => Number(b[1]) - Number(a[1])));
-
+    console.log(getScoresDebugString(candidates, gameStartTime, selectedPlayers, settings));
     console.log("Found best player with total score: " + calculateTotalScore(bestPlayer, gameStartTime, selectedPlayers, settings));
     console.log("Best player score breakdown:");
     console.log(" -> TIME: " + calculateTimeScore(bestPlayer, gameStartTime, settings) * settings.timeScoreWeight);
