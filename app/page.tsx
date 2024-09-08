@@ -652,6 +652,10 @@ export default function Home() {
         </div>
         |
         <div>
+          <p>Special thanks to Yiann Chen</p>
+        </div>
+        |
+        <div>
           <a
             className="text-slate-600"
             target="_blank"
