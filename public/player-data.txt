@@ -59,3 +59,4 @@ Alice Luo, 5
 Jasmine Jin, 6
 Grace Hu, 5
 Cosette Li, 5
+Jingjing Yi, 4
