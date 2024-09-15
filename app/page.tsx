@@ -435,7 +435,7 @@ export default function Home() {
     refreshState();
   }
 
-  function handleSkipPlayer(court: Court, player: Player) {
+  function handlePlayerSelected(court: Court, player: Player) {
     if (getActivePlayer(player.username) === undefined) {
       return;
     }
@@ -575,7 +575,7 @@ export default function Home() {
           courts={activeCourtsState}
           players={activePlayersState}
           handleGameFinished={handleGameFinished}
-          handleSkipPlayer={handleSkipPlayer}
+          handlePlayerSelected={handlePlayerSelected}
         />
       </div>
 
@@ -592,7 +592,7 @@ export default function Home() {
                   isActive={false}
                   court={court}
                   players={activePlayersState}
-                  handleSkipPlayer={() => { }}
+                  handlePlayerSelected={() => { }}
                 />
                 <p className="text-sm">{getWaitTimeText(court)}</p>
               </div>

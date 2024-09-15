@@ -6,10 +6,10 @@ type ActiveCourtsProps = {
   courts: Court[];
   players: Player[];
   handleGameFinished: (i: number) => void;
-  handleSkipPlayer: (court: Court, player: Player) => void;
+  handlePlayerSelected: (court: Court, player: Player) => void;
 }
 
-export default function ActiveCourts({ courts, players, handleGameFinished, handleSkipPlayer }: ActiveCourtsProps) {
+export default function ActiveCourts({ courts, players, handleGameFinished, handlePlayerSelected }: ActiveCourtsProps) {
   function getPlayTime(court: Court) {
     let playTimeMS = Scheduler.getCurrentTime() - court.startTime;
     let playTimeMins = playTimeMS / 1000 / 60; // Convert ms to mins
@@ -31,7 +31,7 @@ export default function ActiveCourts({ courts, players, handleGameFinished, hand
       {
         courts.map((court) =>
           <div className="flex flex-col w-80 items-center gap-y-2" key={court.id}>
-            <CourtDisplay isActive={true} court={court} players={players} handleSkipPlayer={handleSkipPlayer} />
+            <CourtDisplay isActive={true} court={court} players={players} handlePlayerSelected={handlePlayerSelected} />
             <p className="text-sm">{getPlayTimeText(court)}</p>
             {court.playerIDs.length > 0 ?
               <button

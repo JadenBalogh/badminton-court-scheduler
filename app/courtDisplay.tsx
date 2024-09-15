@@ -20,10 +20,10 @@ type CourtProps = {
   isActive: boolean,
   court: Court,
   players: Player[],
-  handleSkipPlayer: (court: Court, player: Player) => void
+  handlePlayerSelected: (court: Court, player: Player) => void
 }
 
-export default function CourtDisplay({ isActive, court, players, handleSkipPlayer = () => { } }: CourtProps) {
+export default function CourtDisplay({ isActive, court, players, handlePlayerSelected = () => { } }: CourtProps) {
   function shouldHighlight(): boolean {
     return isActive && Scheduler.getCurrentTime() - court.startTime < NEW_COURT_DURATION;
   }
@@ -43,11 +43,11 @@ export default function CourtDisplay({ isActive, court, players, handleSkipPlaye
         ? "bg-orange-200 font-semibold outline outline-3 outline-amber-200"
         : "bg-gradient-to-b from-neutral-300 to-zinc-300"}`
     }>
-      <CourtPlayer court={court} player={getPlayer(0)} handleSkipPlayer={handleSkipPlayer} />
-      <CourtPlayer court={court} player={getPlayer(1)} handleSkipPlayer={handleSkipPlayer} />
+      <CourtPlayer court={court} player={getPlayer(0)} handlePlayerSelected={handlePlayerSelected} />
+      <CourtPlayer court={court} player={getPlayer(1)} handlePlayerSelected={handlePlayerSelected} />
       <p className="py-2 text-sm">vs.</p>
-      <CourtPlayer court={court} player={getPlayer(2)} handleSkipPlayer={handleSkipPlayer} />
-      <CourtPlayer court={court} player={getPlayer(3)} handleSkipPlayer={handleSkipPlayer} />
+      <CourtPlayer court={court} player={getPlayer(2)} handlePlayerSelected={handlePlayerSelected} />
+      <CourtPlayer court={court} player={getPlayer(3)} handlePlayerSelected={handlePlayerSelected} />
     </div>
   );
 }
