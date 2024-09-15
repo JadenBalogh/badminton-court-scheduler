@@ -33,11 +33,13 @@ export default function ActiveCourts({ courts, players, handleGameFinished, hand
           <div className="flex flex-col w-80 items-center gap-y-2" key={court.id}>
             <CourtDisplay isActive={true} court={court} players={players} handleSkipPlayer={handleSkipPlayer} />
             <p className="text-sm">{getPlayTimeText(court)}</p>
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-32 h-12 mt-4 rounded"
-              onClick={() => handleGameFinished(court.id)}>
-              Finish Game
-            </button>
+            {court.playerIDs.length > 0 ?
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-32 h-12 mt-4 rounded"
+                onClick={() => handleGameFinished(court.id)}>
+                Finish Game
+              </button> : <></>
+            }
           </div>
         )
       }

@@ -14,7 +14,7 @@ export default function CourtPlayer({ court, player, handleSkipPlayer }: CourtPl
       <div className="text-center max-w-64 w-full"
         onClick={() => handleSkipPlayer(court, player)}>
         <p className="text-lg truncate">
-          {player ? player.name + (SHOW_SKILL_LEVEL ? " (" + player.skillLevel + ")" : "") : "(empty)"}
+          {player ? player.name + (SHOW_SKILL_LEVEL ? " (" + player.skillLevel + ")" : "") : "[empty]"}
         </p>
       </div>
     </div>

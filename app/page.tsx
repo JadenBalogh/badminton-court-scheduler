@@ -97,6 +97,10 @@ export default function Home() {
     loadSession();
     loadPlayerData(false);
     loadRegisteredPlayers(false);
+
+    if (activeCourts.length === 0) {
+      resetCourts();
+    }
   }, []);
 
   // Refresh state every 30 seconds. Ensures timers are always reasonably up to date.
@@ -258,6 +262,16 @@ export default function Home() {
     }
   }
 
+  function isSessionStarted() {
+    for (let activeCourt of activeCourts) {
+      if (activeCourt.playerIDs.length > 0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   function getStartDelay(court: Court) {
     let startDelayMS = court.startTime - Scheduler.getCurrentTime();
     let startDelayMins = startDelayMS / 1000 / 60; // Convert ms to mins
@@ -393,7 +407,7 @@ export default function Home() {
   function clearSession() {
     loadPlayerData(true);
     loadRegisteredPlayers(true);
-    activeCourts = [];
+    resetCourts();
     courtQueue = [];
     refreshState();
   }
@@ -422,6 +436,10 @@ export default function Home() {
   }
 
   function handleSkipPlayer(court: Court, player: Player) {
+    if (getActivePlayer(player.username) === undefined) {
+      return;
+    }
+
     awaitConfirm({
       title: "Skip " + toFirstName(player.name) + "?",
       desc: toFirstName(player.name) + " will be moved to the next available court.",
@@ -566,19 +584,22 @@ export default function Home() {
           Upcoming Games {"->"}
         </h2>
 
-        <div className="flex py-4 gap-x-4 w-full overflow-x-auto">
-          {courtQueueState.map((court, i) =>
-            <div className="flex flex-col w-80 items-center gap-y-2" key={i}>
-              <CourtDisplay
-                isActive={false}
-                court={court}
-                players={activePlayersState}
-                handleSkipPlayer={() => { }}
-              />
-              <p className="text-sm">{getWaitTimeText(court)}</p>
-            </div>
-          )}
-        </div>
+        {isSessionStarted() ?
+          <div className="flex py-4 gap-x-4 w-full overflow-x-auto">
+            {courtQueueState.map((court, i) =>
+              <div className="flex flex-col w-80 items-center gap-y-2" key={i}>
+                <CourtDisplay
+                  isActive={false}
+                  court={court}
+                  players={activePlayersState}
+                  handleSkipPlayer={() => { }}
+                />
+                <p className="text-sm">{getWaitTimeText(court)}</p>
+              </div>
+            )}
+          </div> :
+          <p>No games have been scheduled yet.</p>
+        }
       </div>
 
       <div className="flex gap-4 mt-16">
