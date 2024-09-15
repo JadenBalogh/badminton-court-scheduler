@@ -46,7 +46,8 @@ export type ConfirmDialogOptions = {
   desc: string,
   confirmText: string,
   cancelText: string,
+  selectPlayer: boolean
 }
 
-export type ConfirmDialogCallback = (confirmed: boolean) => void;
+export type ConfirmDialogCallback = (confirmed: boolean, player: Player | undefined) => void;
 export type Callback = () => void;

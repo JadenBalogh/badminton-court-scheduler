@@ -30,6 +30,7 @@ const DEFAULT_CONFIRM_OPTIONS: ConfirmDialogOptions = {
   desc: "",
   confirmText: "",
   cancelText: "",
+  selectPlayer: false
 }
 
 const NEW_COURT_DURATION: number = 10000; // How long a court is considered "new" after starting
@@ -161,7 +162,7 @@ export default function Home() {
     setShowConfirm(true);
 
     let confirmed = await new Promise((resolve, reject) => {
-      setConfirmCallback(() => (confirmed: boolean) => {
+      setConfirmCallback(() => (confirmed: boolean, player: Player | undefined) => {
         clearTimeout(confirmTimeout);
         resolve(confirmed);
       });
@@ -381,7 +382,8 @@ export default function Home() {
       title: "Start session?",
       desc: "Starting the session will reset all games and player stats.",
       confirmText: "Start",
-      cancelText: "Cancel"
+      cancelText: "Cancel",
+      selectPlayer: false
     }, startSession);
   }
 
@@ -400,7 +402,8 @@ export default function Home() {
       title: "Clear session?",
       desc: "Clearing the session will fully wipe and reload all player data.",
       confirmText: "Confirm",
-      cancelText: "Cancel"
+      cancelText: "Cancel",
+      selectPlayer: false
     }, clearSession);
   }
 
@@ -424,7 +427,8 @@ export default function Home() {
       title: "Finish game?",
       desc: "The court will be assigned to the next group in the queue.",
       confirmText: "Finish",
-      cancelText: "Cancel"
+      cancelText: "Cancel",
+      selectPlayer: false
     }, () => onGameFinished(index));
   }
 
@@ -436,16 +440,23 @@ export default function Home() {
   }
 
   function handlePlayerSelected(court: Court, player: Player) {
-    if (getActivePlayer(player.username) === undefined) {
-      return;
+    if (getActivePlayer(player.username) !== undefined) {
+      awaitConfirm({
+        title: "Skip " + toFirstName(player.name) + "?",
+        desc: toFirstName(player.name) + " will be moved to the next available court.",
+        confirmText: "Skip",
+        cancelText: "Cancel",
+        selectPlayer: false
+      }, () => onPlayerSkipped(court, player));
+    } else {
+      // awaitConfirm({
+      //   title: "Skip " + toFirstName(player.name) + "?",
+      //   desc: toFirstName(player.name) + " will be moved to the next available court.",
+      //   confirmText: "Skip",
+      //   cancelText: "Cancel",
+      //   selectPlayer: true
+      // }, () => onPlayerSkipped(court, player));
     }
-
-    awaitConfirm({
-      title: "Skip " + toFirstName(player.name) + "?",
-      desc: toFirstName(player.name) + " will be moved to the next available court.",
-      confirmText: "Skip",
-      cancelText: "Cancel"
-    }, () => onPlayerSkipped(court, player));
   }
 
   function onPlayerSkipped(court: Court, player: Player) {
