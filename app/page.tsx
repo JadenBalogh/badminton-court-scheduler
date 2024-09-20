@@ -143,7 +143,7 @@ export default function Home() {
       return; // Players are already loaded, don't overwrite
     }
 
-    let data = await fetch('./registered-players-sept15.txt');
+    let data = await fetch('./registered-players-sept22.txt');
     let text = await data.text();
 
     activePlayers = [];
@@ -638,7 +638,7 @@ export default function Home() {
           </button>
 
           <div>
-            {activePlayersState.map((player, idx) =>
+            {activePlayersState.toSorted((a, b) => a.username.localeCompare(b.username)).map((player, idx) =>
               <div className="flex flex-col" key={idx}>
                 <div className="font-semibold">
                   <input
