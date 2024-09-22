@@ -5,11 +5,12 @@ import { Scheduler } from './scheduler';
 type ActiveCourtsProps = {
   courts: Court[];
   players: Player[];
+  started: boolean;
   handleGameFinished: (i: number) => void;
-  handlePlayerSelected: (court: Court, player: Player) => void;
+  handlePlayerSelected: (court: Court, player: Player, index: number) => void;
 }
 
-export default function ActiveCourts({ courts, players, handleGameFinished, handlePlayerSelected }: ActiveCourtsProps) {
+export default function ActiveCourts({ courts, players, started, handleGameFinished, handlePlayerSelected }: ActiveCourtsProps) {
   function getPlayTime(court: Court) {
     let playTimeMS = Scheduler.getCurrentTime() - court.startTime;
     let playTimeMins = playTimeMS / 1000 / 60; // Convert ms to mins
@@ -17,7 +18,7 @@ export default function ActiveCourts({ courts, players, handleGameFinished, hand
   }
 
   function getPlayTimeText(court: Court) {
-    if (court.playerIDs.length === 0) {
+    if (!started) {
       return "";
     }
 
@@ -33,7 +34,7 @@ export default function ActiveCourts({ courts, players, handleGameFinished, hand
           <div className="flex flex-col w-80 items-center gap-y-2" key={court.id}>
             <CourtDisplay isActive={true} court={court} players={players} handlePlayerSelected={handlePlayerSelected} />
             <p className="text-sm">{getPlayTimeText(court)}</p>
-            {court.playerIDs.length > 0 ?
+            {started ?
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-32 h-12 mt-4 rounded"
                 onClick={() => handleGameFinished(court.id)}>

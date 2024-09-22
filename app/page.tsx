@@ -1,6 +1,6 @@
 'use client'
 
-import { Player, Court, SessionSettings, PlayerData, ConfirmDialogOptions, ConfirmDialogCallback, Callback } from '../types/types'
+import { Player, Court, SessionSettings, PlayerData, ConfirmDialogOptions, ConfirmDialogResult, ConfirmDialogCallback, ConfirmCallback } from '../types/types'
 import ActiveCourts from './activeCourts';
 import ConfirmDialog from './confirmDialog';
 import CourtDisplay from './courtDisplay';
@@ -59,6 +59,8 @@ export default function Home() {
   const [activePlayersState, setActivePlayersState] = useState<Player[]>([]); // List of players included in the current session
   const [activeCourtsState, setActiveCourtsState] = useState<Court[]>([]);
   const [courtQueueState, setCourtQueueState] = useState<Court[]>([]);
+
+  const [sessionStarted, setSessionStarted] = useState<boolean>(false);
 
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [confirmOptions, setConfirmOptions] = useState<ConfirmDialogOptions>(DEFAULT_CONFIRM_OPTIONS);
@@ -157,26 +159,23 @@ export default function Home() {
     refreshState();
   }
 
-  async function awaitConfirm(options: ConfirmDialogOptions, onConfirmed: Callback) {
+  async function awaitConfirm(options: ConfirmDialogOptions, onConfirmed: ConfirmCallback) {
     setConfirmOptions(options);
     setShowConfirm(true);
 
-    let confirmed = await new Promise((resolve, reject) => {
+    let confirmResult: ConfirmDialogResult = await new Promise((resolve, reject) => {
       setConfirmCallback(() => (confirmed: boolean, player: Player | undefined) => {
-        clearTimeout(confirmTimeout);
-        resolve(confirmed);
+        resolve({
+          confirmed,
+          player
+        });
       });
-
-      const confirmTimeout = setTimeout(() => {
-        console.log("Confirmation timed out after 10 seconds.");
-        resolve(false);
-      }, 10000);
     });
 
     setShowConfirm(false);
 
-    if (confirmed) {
-      onConfirmed();
+    if (confirmResult.confirmed) {
+      onConfirmed(confirmResult.player);
     }
   }
 
@@ -254,6 +253,15 @@ export default function Home() {
     }
   }
 
+  function isPlayerAssigned(username: string) {
+    for (let activeCourt of activeCourts) {
+      if (activeCourt.playerIDs.includes(username)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   function shuffleActivePlayers() {
     for (let i = activePlayers.length - 1; i > 0; i--) {
       let j = Math.floor(Math.random() * (i + 1));
@@ -261,16 +269,6 @@ export default function Home() {
       activePlayers[i] = activePlayers[j];
       activePlayers[j] = temp;
     }
-  }
-
-  function isSessionStarted() {
-    for (let activeCourt of activeCourts) {
-      if (activeCourt.playerIDs.length > 0) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   function getStartDelay(court: Court) {
@@ -356,9 +354,9 @@ export default function Home() {
 
   function fillEmptyCourts() {
     for (let i = 0; i < activeCourts.length; i++) {
-      if (activeCourts[i].playerIDs.length === 0 && courtQueue[i]) {
-        startGame(i, courtQueue[i], Scheduler.getCurrentTime(), false);
-      }
+      let hasAssignedPlayers = activeCourts[i].playerIDs.some((playerID) => playerID !== "");
+      let assignedCourt = hasAssignedPlayers ? activeCourts[i] : getNextCourt();
+      startGame(i, assignedCourt, Scheduler.getCurrentTime(), false);
     }
   }
 
@@ -388,12 +386,10 @@ export default function Home() {
   }
 
   function startSession() {
-    resetPlayers();
-    resetCourts();
     shuffleActivePlayers();
-    generateCourtQueue();
     fillEmptyCourts();
     generateCourtQueue();
+    setSessionStarted(true);
     refreshState();
   }
 
@@ -408,6 +404,7 @@ export default function Home() {
   }
 
   function clearSession() {
+    setSessionStarted(false);
     loadPlayerData(true);
     loadRegisteredPlayers(true);
     resetCourts();
@@ -439,8 +436,8 @@ export default function Home() {
     refreshState();
   }
 
-  function handlePlayerSelected(court: Court, player: Player) {
-    if (getActivePlayer(player.username) !== undefined) {
+  function handlePlayerSelected(court: Court, player: Player, index: number) {
+    if (sessionStarted) { // Skip player
       awaitConfirm({
         title: "Skip " + toFirstName(player.name) + "?",
         desc: toFirstName(player.name) + " will be moved to the next available court.",
@@ -448,14 +445,22 @@ export default function Home() {
         cancelText: "Cancel",
         selectPlayer: false
       }, () => onPlayerSkipped(court, player));
-    } else {
-      // awaitConfirm({
-      //   title: "Skip " + toFirstName(player.name) + "?",
-      //   desc: toFirstName(player.name) + " will be moved to the next available court.",
-      //   confirmText: "Skip",
-      //   cancelText: "Cancel",
-      //   selectPlayer: true
-      // }, () => onPlayerSkipped(court, player));
+    } else if (!getActivePlayer(player.username)) { // Assign player
+      awaitConfirm({
+        title: "Assign Player",
+        desc: "",
+        confirmText: "Assign",
+        cancelText: "Cancel",
+        selectPlayer: true
+      }, (selectedPlayer) => onPlayerAssigned(court, selectedPlayer, index));
+    } else { // Clear assigned player
+      awaitConfirm({
+        title: "Clear " + toFirstName(player.name) + "?",
+        desc: toFirstName(player.name) + " will no longer be assigned to this court.",
+        confirmText: "Clear",
+        cancelText: "Cancel",
+        selectPlayer: false
+      }, (selectedPlayer) => onPlayerAssigned(court, selectedPlayer, index));
     }
   }
 
@@ -471,6 +476,24 @@ export default function Home() {
     player.lastPlayedTimestamp = 0; // Set the skipped player to the max wait time to ensure being prioritized next game
 
     generateCourtQueue();
+    refreshState();
+  }
+
+  function onPlayerAssigned(court: Court, player: Player | undefined, index: number) {
+    console.log("Assigning player: " + player?.name + " to court " + activeCourts.indexOf(court));
+
+    for (let i = 0; i < 4; i++) {
+      if (!court.playerIDs[i]) {
+        court.playerIDs.push("");
+      }
+    }
+
+    let activePlayer = getActivePlayer(court.playerIDs[index] ?? player?.username);
+    if (activePlayer) {
+      activePlayer.isPlaying = player !== undefined;
+    }
+
+    court.playerIDs.splice(index, 1, player ? player.username : "");
     refreshState();
   }
 
@@ -575,6 +598,7 @@ export default function Home() {
         show={showConfirm}
         options={confirmOptions}
         callback={confirmCallback}
+        players={activePlayersState.filter((player) => !isPlayerAssigned(player.username))}
       />
 
       <div className="flex flex-col items-center gap-y-4">
@@ -585,6 +609,7 @@ export default function Home() {
         <ActiveCourts
           courts={activeCourtsState}
           players={activePlayersState}
+          started={sessionStarted}
           handleGameFinished={handleGameFinished}
           handlePlayerSelected={handlePlayerSelected}
         />
@@ -595,7 +620,7 @@ export default function Home() {
           Upcoming Games {"->"}
         </h2>
 
-        {isSessionStarted() ?
+        {sessionStarted ?
           <div className="flex py-4 gap-x-4 w-full overflow-x-auto">
             {courtQueueState.map((court, i) =>
               <div className="flex flex-col w-80 items-center gap-y-2" key={i}>
@@ -643,11 +668,12 @@ export default function Home() {
                 <div className="font-semibold">
                   <input
                     type="checkbox"
+                    id={player.name}
                     value={player.name}
                     checked={isPlayerEnabled(player.name)}
                     onChange={(event) => onPlayerChecked(event)}
                   />
-                  {' '}{player.name}
+                  <label htmlFor={player.name}>{" " + player.name}</label>
                 </div>
                 <p className="text-sm pl-6">{"-> (Played: " + player.gamesPlayed + ")"}</p>
               </div>

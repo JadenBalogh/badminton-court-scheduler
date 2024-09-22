@@ -20,7 +20,7 @@ type CourtProps = {
   isActive: boolean,
   court: Court,
   players: Player[],
-  handlePlayerSelected: (court: Court, player: Player) => void
+  handlePlayerSelected: (court: Court, player: Player, index: number) => void
 }
 
 export default function CourtDisplay({ isActive, court, players, handlePlayerSelected = () => { } }: CourtProps) {
@@ -43,11 +43,11 @@ export default function CourtDisplay({ isActive, court, players, handlePlayerSel
         ? "bg-orange-200 font-semibold outline outline-3 outline-amber-200"
         : "bg-gradient-to-b from-neutral-300 to-zinc-300"}`
     }>
-      <CourtPlayer court={court} player={getPlayer(0)} handlePlayerSelected={handlePlayerSelected} />
-      <CourtPlayer court={court} player={getPlayer(1)} handlePlayerSelected={handlePlayerSelected} />
+      <CourtPlayer court={court} player={getPlayer(0)} index={0} handlePlayerSelected={handlePlayerSelected} />
+      <CourtPlayer court={court} player={getPlayer(1)} index={1} handlePlayerSelected={handlePlayerSelected} />
       <p className="py-2 text-sm">vs.</p>
-      <CourtPlayer court={court} player={getPlayer(2)} handlePlayerSelected={handlePlayerSelected} />
-      <CourtPlayer court={court} player={getPlayer(3)} handlePlayerSelected={handlePlayerSelected} />
+      <CourtPlayer court={court} player={getPlayer(2)} index={2} handlePlayerSelected={handlePlayerSelected} />
+      <CourtPlayer court={court} player={getPlayer(3)} index={3} handlePlayerSelected={handlePlayerSelected} />
     </div>
   );
 }
