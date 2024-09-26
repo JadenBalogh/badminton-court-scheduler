@@ -274,6 +274,11 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
     getActivePlayer(player.username, players).lastScheduledEndTimestamp = scheduledEnd;
   });
 
+  if (ADVANCED_DEBUG_LOGGING) {
+    console.log("Active players after scheduling:");
+    console.log(structuredClone(players));
+  }
+
   // Step 3: Perform greedy algorithm to select players to add to the next court
   for (let i = 0; i < queueLength; i++) {
     let courtIndex = i % settings.courtCount;
