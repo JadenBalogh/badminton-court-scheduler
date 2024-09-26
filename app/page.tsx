@@ -594,6 +594,8 @@ export default function Home() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-between gap-y-16 pt-8">
+      <meta name="mobile-web-app-capable" content="yes" />
+      
       <ConfirmDialog
         show={showConfirm}
         options={confirmOptions}

@@ -6,10 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Badminton Court Scheduler",
-  description: "A badminton court scheduling app.",
-  appleWebApp: {
-    title: "Badminton Court Scheduler"
-  },
+  description: "A badminton court scheduling app."
 };
 
 export default function RootLayout({
