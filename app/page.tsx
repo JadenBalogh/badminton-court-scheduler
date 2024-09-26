@@ -39,6 +39,7 @@ let playerDatas: PlayerData[] = [];
 let activePlayers: Player[] = [];
 let activeCourts: Court[] = [];
 let courtQueue: Court[] = [];
+let sessionStarted: boolean = false;
 
 export default function Home() {
   const [sessionSettings, setSessionSettings] = useState<SessionSettings>({
@@ -59,8 +60,7 @@ export default function Home() {
   const [activePlayersState, setActivePlayersState] = useState<Player[]>([]); // List of players included in the current session
   const [activeCourtsState, setActiveCourtsState] = useState<Court[]>([]);
   const [courtQueueState, setCourtQueueState] = useState<Court[]>([]);
-
-  const [sessionStarted, setSessionStarted] = useState<boolean>(false);
+  const [sessionStartedState, setSessionStartedState] = useState<boolean>(false);
 
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [confirmOptions, setConfirmOptions] = useState<ConfirmDialogOptions>(DEFAULT_CONFIRM_OPTIONS);
@@ -71,6 +71,7 @@ export default function Home() {
     setActivePlayersState([...activePlayers]);
     setActiveCourtsState([...activeCourts]);
     setCourtQueueState([...courtQueue]);
+    setSessionStartedState(sessionStarted);
 
     saveSession();
   }
@@ -82,6 +83,7 @@ export default function Home() {
     window.sessionStorage.setItem("activePlayers", JSON.stringify(activePlayers));
     window.sessionStorage.setItem("activeCourts", JSON.stringify(activeCourts));
     window.sessionStorage.setItem("courtQueue", JSON.stringify(courtQueue));
+    window.sessionStorage.setItem("sessionStarted", sessionStarted ? "true" : "false");
   }
 
   function loadSession() {
@@ -91,6 +93,7 @@ export default function Home() {
     activePlayers = JSON.parse(window.sessionStorage.getItem("activePlayers") ?? "[]");
     activeCourts = JSON.parse(window.sessionStorage.getItem("activeCourts") ?? "[]");
     courtQueue = JSON.parse(window.sessionStorage.getItem("courtQueue") ?? "[]");
+    sessionStarted = (window.sessionStorage.getItem("sessionStarted") ?? "false") === "true";
 
     refreshState();
   }
@@ -389,7 +392,7 @@ export default function Home() {
     shuffleActivePlayers();
     fillEmptyCourts();
     generateCourtQueue();
-    setSessionStarted(true);
+    sessionStarted = true;
     refreshState();
   }
 
@@ -404,7 +407,7 @@ export default function Home() {
   }
 
   function clearSession() {
-    setSessionStarted(false);
+    sessionStarted = false;
     loadPlayerData(true);
     loadRegisteredPlayers(true);
     resetCourts();
@@ -595,7 +598,7 @@ export default function Home() {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-between gap-y-16 pt-8">
       <meta name="mobile-web-app-capable" content="yes" />
-      
+
       <ConfirmDialog
         show={showConfirm}
         options={confirmOptions}
@@ -611,7 +614,7 @@ export default function Home() {
         <ActiveCourts
           courts={activeCourtsState}
           players={activePlayersState}
-          started={sessionStarted}
+          started={sessionStartedState}
           handleGameFinished={handleGameFinished}
           handlePlayerSelected={handlePlayerSelected}
         />
@@ -622,7 +625,7 @@ export default function Home() {
           Upcoming Games {"->"}
         </h2>
 
-        {sessionStarted ?
+        {sessionStartedState ?
           <div className="flex py-4 gap-x-4 w-full overflow-x-auto">
             {courtQueueState.map((court, i) =>
               <div className="flex flex-col w-80 items-center gap-y-2" key={i}>
