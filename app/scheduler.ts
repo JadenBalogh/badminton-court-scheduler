@@ -27,8 +27,8 @@ function getScoresDebugString(players: Player[], gameStartTime: number, selected
 
 // Returns the normalized TIME score for the given player. 0 minute wait = 0.0 time score. 30 minute wait = 1.0 time score.
 function calculateTimeScore(player: Player, gameStartTime: number, settings: SessionSettings) {
-  if (player.isPlaying) {
-    return 0;
+  if (Math.abs(gameStartTime - player.lastScheduledEndTimestamp) < 1000) {
+    return -1; // Player is, or would be expected to be, currently playing
   }
 
   let waitTime = gameStartTime - player.lastScheduledEndTimestamp;
