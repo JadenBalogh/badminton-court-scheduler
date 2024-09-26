@@ -268,8 +268,9 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
   playerQueue.forEach(player => {
     let scheduledEnd = player.lastPlayedTimestamp;
     if (player.isPlaying) {
-      let playerCourt = courts.find((court) => court.playerIDs.includes(player.username));
-      scheduledEnd = playerCourt ? playerCourt.startTime + settings.expectedGameDuration : scheduledEnd;
+      // let playerCourt = courts.find((court) => court.playerIDs.includes(player.username));
+      // scheduledEnd = playerCourt ? playerCourt.startTime + settings.expectedGameDuration : scheduledEnd;
+      scheduledEnd = scheduledGameTime;
     }
     getActivePlayer(player.username, players).lastScheduledEndTimestamp = scheduledEnd;
   });
