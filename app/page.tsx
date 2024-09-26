@@ -16,7 +16,7 @@ const MAX_INDIVIDUAL_SKILL_VARIANCE = 3;
 
 const EXPECTED_GAME_DURATION = 600000; // 10 minutes in milliseconds
 const EXPECTED_GAME_DURATION_VARIANCE = 300000; // 5 minutes in milliseconds
-const MAX_TIME_SCORE_WAIT_TIME = 1800000; // 30 minutes in milliseconds
+const MAX_TIME_SCORE_WAIT_TIME = 1200000; // 20 minutes in milliseconds
 const MAX_DIVERSITY_SCORE_PLAY_DELAY = 3600000; // 1 hour in milliseconds
 const MAX_DIVERSITY_SCORE_PLAY_COUNT = 5;
 
