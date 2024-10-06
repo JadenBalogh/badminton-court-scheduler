@@ -71,8 +71,8 @@ Jenny Shih, 3
 Yolanda, 5
 Ryan 1, 8
 Jeremy, 8
-James Jin, 6
-Monlam, 7
+James Chin, 6
+Mon Lam, 6
 Ryan 2, 6
 Rolland He, 6
 Nina Ma, 6
@@ -89,3 +89,9 @@ Michael Oh, 6
 Ann Peng, 4
 Jesse Li, 7
 Julie Sun, 4
+Melissa Ong, 7
+Robin Wei, 7
+Miki Tang, 5
+Yanxiang Chen, 4
+Anh Nguyen, 5
+Bethan Athill, 7
