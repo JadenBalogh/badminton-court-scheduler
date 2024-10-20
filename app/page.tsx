@@ -4,6 +4,7 @@ import { Player, Court, SessionSettings, PlayerData, ConfirmDialogOptions, Confi
 import ActiveCourts from './activeCourts';
 import ConfirmDialog from './confirmDialog';
 import CourtDisplay from './courtDisplay';
+import PlayerInfo from './playerInfo';
 import { Scheduler } from './scheduler';
 import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 
@@ -202,8 +203,20 @@ export default function Home() {
     return playerDatas.find(data => data.username === username);
   }
 
-  function onPlayerChecked(event: ChangeEvent<HTMLInputElement>) {
-    setPlayerEnabled(event.target.value, event.target.checked);
+  function onPlayerChecked(username: string, checked: boolean) {
+    setPlayerEnabled(username, checked);
+    generateCourtQueue();
+    refreshState();
+  }
+
+  function onPlayerEdited(username: string, newName: string, newSkill: number) {
+    let player = getActivePlayer(username);
+    if (!player) {
+      return;
+    }
+
+    player.name = newName;
+    player.skillLevel = newSkill;
     generateCourtQueue();
     refreshState();
   }
@@ -237,19 +250,16 @@ export default function Home() {
     activePlayers.push(player);
   }
 
-  function removeActivePlayer(name: string) {
-    let username = toUsername(name);
+  function removeActivePlayer(username: string) {
     activePlayers = activePlayers.filter(player => player.username != username);
   }
 
-  function isPlayerEnabled(name: string) {
-    let username = toUsername(name);
+  function isPlayerEnabled(username: string) {
     let player = activePlayers.find(p => p.username === username);
     return player !== undefined && player.isEnabled;
   }
 
-  function setPlayerEnabled(name: string, enabled: boolean) {
-    let username = toUsername(name);
+  function setPlayerEnabled(username: string, enabled: boolean) {
     let player = activePlayers.find(p => p.username === username);
     if (player) {
       player.isEnabled = enabled;
@@ -586,9 +596,9 @@ export default function Home() {
       return;
     }
 
-    let enabled = isPlayerEnabled(activePlayers[0].name);
+    let enabled = isPlayerEnabled(activePlayers[0].username);
     for (let player of activePlayers) {
-      setPlayerEnabled(player.name, !enabled);
+      setPlayerEnabled(player.username, !enabled);
     }
 
     generateCourtQueue();
@@ -667,21 +677,17 @@ export default function Home() {
             Toggle All
           </button>
 
-          <div>
+          <p>---</p>
+
+          <div className="flex flex-col gap-y-1">
             {activePlayersState.toSorted((a, b) => a.username.localeCompare(b.username)).map((player, idx) =>
-              <div className="flex flex-col" key={idx}>
-                <div className="font-semibold">
-                  <input
-                    type="checkbox"
-                    id={player.name}
-                    value={player.name}
-                    checked={isPlayerEnabled(player.name)}
-                    onChange={(event) => onPlayerChecked(event)}
-                  />
-                  <label htmlFor={player.name}>{" " + player.name}</label>
-                </div>
-                <p className="text-sm pl-6">{"-> (Played: " + player.gamesPlayed + ")"}</p>
-              </div>
+              <PlayerInfo
+                player={player}
+                key={idx}
+                checked={isPlayerEnabled(player.username)}
+                onPlayerChecked={(event) => onPlayerChecked(player.username, event.target.checked)}
+                onPlayerEdited={onPlayerEdited}
+              />
             )}
           </div>
         </div>
