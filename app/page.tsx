@@ -690,6 +690,8 @@ export default function Home() {
               />
             )}
           </div>
+
+          <p>{"->"} {activePlayersState.length} total players</p>
         </div>
 
         {SHOW_DEBUG_OPTIONS ? <div className="flex flex-col">
