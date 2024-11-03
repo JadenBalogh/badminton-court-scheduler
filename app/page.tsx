@@ -31,7 +31,8 @@ const DEFAULT_CONFIRM_OPTIONS: ConfirmDialogOptions = {
   desc: "",
   confirmText: "",
   cancelText: "",
-  selectPlayer: false
+  defaultOption: "",
+  players: [],
 }
 
 const NEW_COURT_DURATION: number = 10000; // How long a court is considered "new" after starting
@@ -394,7 +395,8 @@ export default function Home() {
       desc: "Starting the session will reset all games and player stats.",
       confirmText: "Start",
       cancelText: "Cancel",
-      selectPlayer: false
+      defaultOption: "",
+      players: [],
     }, startSession);
   }
 
@@ -412,7 +414,8 @@ export default function Home() {
       desc: "Clearing the session will fully wipe and reload all player data.",
       confirmText: "Confirm",
       cancelText: "Cancel",
-      selectPlayer: false
+      defaultOption: "",
+      players: [],
     }, clearSession);
   }
 
@@ -438,7 +441,8 @@ export default function Home() {
       desc: "The court will be assigned to the next group in the queue.",
       confirmText: "Finish",
       cancelText: "Cancel",
-      selectPlayer: false
+      defaultOption: "",
+      players: [],
     }, () => onGameFinished(index));
   }
 
@@ -450,21 +454,23 @@ export default function Home() {
   }
 
   function handlePlayerSelected(court: Court, player: Player, index: number) {
-    if (sessionStarted) { // Skip player
+    if (sessionStarted) { // Replace player
       awaitConfirm({
-        title: "Skip " + toFirstName(player.name) + "?",
-        desc: toFirstName(player.name) + " will be moved to the next available court.",
-        confirmText: "Skip",
+        title: "Replace " + toFirstName(player.name) + "?",
+        desc: "Select a replacement player below. " + toFirstName(player.name) + " will be moved to the next available court.",
+        confirmText: "Replace",
         cancelText: "Cancel",
-        selectPlayer: false
-      }, () => onPlayerSkipped(court, player));
+        defaultOption: "Best Match (Default)",
+        players: activePlayersState.filter((player) => player.isEnabled && !player.isPlaying),
+      }, (selectedPlayer) => onPlayerSkipped(court, player, selectedPlayer));
     } else if (!getActivePlayer(player.username)) { // Assign player
       awaitConfirm({
         title: "Assign Player",
         desc: "",
         confirmText: "Assign",
         cancelText: "Cancel",
-        selectPlayer: true
+        defaultOption: "",
+        players: activePlayersState.filter((player) => !isPlayerAssigned(player.username)),
       }, (selectedPlayer) => onPlayerAssigned(court, selectedPlayer, index));
     } else { // Clear assigned player
       awaitConfirm({
@@ -472,21 +478,22 @@ export default function Home() {
         desc: toFirstName(player.name) + " will no longer be assigned to this court.",
         confirmText: "Clear",
         cancelText: "Cancel",
-        selectPlayer: false
+        defaultOption: "",
+        players: [],
       }, (selectedPlayer) => onPlayerAssigned(court, selectedPlayer, index));
     }
   }
 
-  function onPlayerSkipped(court: Court, player: Player) {
-    console.log("Skipping player: " + player.name);
+  function onPlayerSkipped(court: Court, oldPlayer: Player, newPlayer: Player | undefined) {
+    console.log("Skipping player: " + oldPlayer.name);
 
-    let skippedIndex = court.playerIDs.indexOf(player.username);
-    let replacementPlayer = getBestPlayer(court, skippedIndex);
+    let skippedIndex = court.playerIDs.indexOf(oldPlayer.username);
+    let replacementPlayer = newPlayer ?? getBestPlayer(court, skippedIndex);
     court.playerIDs.splice(skippedIndex, 1, replacementPlayer.username);
     startGame(court.id, court, Scheduler.getCurrentTime(), false);
 
-    player.isPlaying = false;
-    player.lastPlayedTimestamp = 0; // Set the skipped player to the max wait time to ensure being prioritized next game
+    oldPlayer.isPlaying = false;
+    oldPlayer.lastPlayedTimestamp = 0; // Set the skipped player to the max wait time to ensure being prioritized next game
 
     generateCourtQueue();
     refreshState();
@@ -613,7 +620,6 @@ export default function Home() {
         show={showConfirm}
         options={confirmOptions}
         callback={confirmCallback}
-        players={activePlayersState.filter((player) => !isPlayerAssigned(player.username))}
       />
 
       <div className="flex flex-col items-center gap-y-4">

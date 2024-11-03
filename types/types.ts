@@ -42,11 +42,12 @@ export type SessionSettings = {
 }
 
 export type ConfirmDialogOptions = {
-  title: string,
-  desc: string,
-  confirmText: string,
-  cancelText: string,
-  selectPlayer: boolean
+  title: string;
+  desc: string;
+  confirmText: string;
+  cancelText: string;
+  defaultOption: string;
+  players: Player[];
 }
 
 export type ConfirmDialogResult = {
