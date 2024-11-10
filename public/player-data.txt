@@ -28,7 +28,7 @@ Tony Lin, 6
 Linna Lo, 4
 Rajiv Maikhuri, 5
 Vickie Nay, 6
-Ryan O, 8
+Ryan O, 7
 David Tang, 5
 Derek Waltho, 4
 Daisy Xiao, 5
@@ -87,7 +87,7 @@ Alex Lee, 6
 Wei Ting Lin, 5
 Michael Oh, 6
 Ann Peng, 4
-Jesse Li, 7
+Jesse Li, 6
 Julie Sun, 4
 Melissa Ong, 7
 Robin Wei, 7
@@ -98,3 +98,8 @@ Beth Athill, 6
 Xi, 6
 Michelle Huang, 4
 Fred Chen, 5
+Alexandra Waxman, 6
+Viktoriia Orel, 6
+ChaoYun Liu, 4
+Cici Cao, 5
+Nick Xie, 5
