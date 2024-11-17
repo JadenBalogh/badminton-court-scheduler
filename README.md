@@ -1,4 +1,5 @@
 # badminton-court-scheduler
+Website can be accessed at: https://jadenbalogh.github.io/badminton-court-scheduler/  
 Use `npm run dev` to test locally.
 
 ## Scheduling Algorithm
