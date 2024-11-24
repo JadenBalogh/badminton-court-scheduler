@@ -40,7 +40,7 @@ Yong Zhang, 3
 Robin Zhang, 6
 Jingyi Zhou, 3
 Ray Zhu, 4
-Rebecca Bi, 4
+Rebecca Bi, 5
 Maggie Mai, 3
 Leonie Chen, 4
 Wesley Burnawan, 6
@@ -100,7 +100,7 @@ Michelle Huang, 4
 Fred Chen, 5
 Alexandra Waxman, 6
 Viktoriia Orel, 6
-Hazel Liu, 4
+Hazel Liu, 3
 Ceci Cao, 5
 Nick Xie, 5
 Jackie Li, 4
