@@ -7,6 +7,7 @@ const DEFAULT_PLAYER: Player = {
   name: "[empty]",
   username: "",
   skillLevel: 0,
+  gender: "?",
   isEnabled: false,
   isPlaying: false,
   lastPlayedTimestamp: 0,
