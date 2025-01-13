@@ -5,6 +5,7 @@ const DEFAULT_PLAYER: Player = {
   name: "",
   username: "",
   skillLevel: 0,
+  gender: "",
   isEnabled: false,
   isPlaying: false,
   lastPlayedTimestamp: 0,
@@ -21,18 +22,17 @@ function getScoresDebugString(players: Player[], gameStartTime: number, selected
     scoresArray.push("DIVERSITY: " + calculateDiversityScore(player, gameStartTime, selectedPlayers, settings) * settings.diversityScoreWeight);
     scoresArray.push("BALANCE: " + calculateBalanceScore(player, selectedPlayers, settings) * settings.balanceScoreWeight);
     scoresArray.push("SKILL: " + calculateSkillScore(player, selectedPlayers, settings) * settings.skillScoreWeight);
+    scoresArray.push("GENDER: " + calculateGenderScore(player, selectedPlayers, settings) * settings.genderScoreWeight);
+    scoresArray.push("Wait Time: " + ((gameStartTime - player.lastScheduledEndTimestamp) / 60000) + " mins");
     return [player.name, calculateTotalScore(player, gameStartTime, selectedPlayers, settings), scoresArray, player];
   }).sort((a, b) => Number(b[1]) - Number(a[1]));
 }
 
 // Returns the normalized TIME score for the given player. 0 minute wait = 0.0 time score. 30 minute wait = 1.0 time score.
 function calculateTimeScore(player: Player, gameStartTime: number, settings: SessionSettings) {
-  if (Math.abs(gameStartTime - player.lastScheduledEndTimestamp) < 1000) {
-    return -1; // Player is, or would be expected to be, currently playing
-  }
-
   let waitTime = gameStartTime - player.lastScheduledEndTimestamp;
-  return Math.min(waitTime, settings.maxTimeScoreWaitTime) / settings.maxTimeScoreWaitTime;
+  let clampedWaitTime = Math.max(0, Math.min(waitTime, settings.maxTimeScoreWaitTime));
+  return clampedWaitTime / settings.maxTimeScoreWaitTime;
 }
 
 // Returns the normalized DIVERSITY score for the given player. Divided into two parts:
@@ -89,13 +89,41 @@ function calculateSkillScore(player: Player, otherPlayers: Player[], settings: S
   return 1 - Math.min(skillVariance / (settings.maxIndividualSkillVariance + 1), 1);
 }
 
+// Returns the normalized GENDER score for the given player. Gender match = 1.0 score, non-match = 0.0 score.
+function calculateGenderScore(player: Player, otherPlayers: Player[], settings: SessionSettings) {
+  if (otherPlayers.length < 2) {
+    return 0; // Gender score can only be calculated when at least one player has been picked on each team.
+  }
+
+  let team1Gender1 = otherPlayers[0].gender;
+  let team2Gender1 = otherPlayers[1].gender;
+  let targetGender;
+
+  if (otherPlayers.length === 2) {
+    if (team1Gender1 === team2Gender1) {
+      return 0; // If both teams have 1 player of the same gender, it doesn't matter who we pick next. You'll either get mixed or doubles. Skip further calculation.
+    }
+    targetGender = team1Gender1 === "M" ? "F" : "M";
+  } else {
+    let team1Gender2 = otherPlayers[2].gender;
+    if (team1Gender1 === team1Gender2) {
+      targetGender = team1Gender1;
+    } else {
+      targetGender = team2Gender1 === "M" ? "F" : "M";
+    }
+  }
+
+  return player.gender === targetGender ? 1 : 0;
+}
+
 // Returns the weighted sum of the TIME, DIVERSITY, BALANCE, and SKILL scores
 function calculateTotalScore(player: Player, gameStartTime: number, otherPlayers: Player[], settings: SessionSettings) {
   let timeScore = calculateTimeScore(player, gameStartTime, settings) * settings.timeScoreWeight;
   let diversityScore = calculateDiversityScore(player, gameStartTime, otherPlayers, settings) * settings.diversityScoreWeight;
   let balance = calculateBalanceScore(player, otherPlayers, settings) * settings.balanceScoreWeight;
   let skill = calculateSkillScore(player, otherPlayers, settings) * settings.skillScoreWeight;
-  return timeScore + diversityScore + balance + skill;
+  let gender = calculateGenderScore(player, otherPlayers, settings) * settings.genderScoreWeight;
+  return timeScore + diversityScore + balance + skill + gender;
 }
 
 // Returns the best matching player in the queue based on the scheduling heuristics
@@ -139,6 +167,7 @@ function assignBestPlayer(playerQueue: Player[], gameStartTime: number, selected
     console.log(" -> DIVERSITY: " + calculateDiversityScore(bestPlayer, gameStartTime, selectedPlayers, settings) * settings.diversityScoreWeight);
     console.log(" -> BALANCE: " + calculateBalanceScore(bestPlayer, selectedPlayers, settings) * settings.balanceScoreWeight);
     console.log(" -> SKILL: " + calculateSkillScore(bestPlayer, selectedPlayers, settings) * settings.skillScoreWeight);
+    console.log(" -> GENDER: " + calculateGenderScore(bestPlayer, selectedPlayers, settings) * settings.genderScoreWeight);
     console.log(" -> Last Scheduled End: " + bestPlayer.lastScheduledEndTimestamp);
   }
 
@@ -264,6 +293,7 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
     console.log(structuredClone(startOffsets));
   }
 
+  let debugStartTime = getCurrentTime();
   let scheduledGameTime = getCurrentTime();
   playerQueue.forEach(player => {
     let scheduledEnd = player.lastPlayedTimestamp;
@@ -298,7 +328,7 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
       console.log("*****");
       console.log("*****");
       console.log("*****");
-      console.log("Scheduling Court " + i + " at time " + scheduledGameTime + "...");
+      console.log("Scheduling Court " + i + " at time " + scheduledGameTime + " (" + ((scheduledGameTime - debugStartTime) / 60000) + " minutes later)");
     }
 
     court.playerIDs = assignCourtPlayers(playerQueue, players, scheduledGameTime, settings);

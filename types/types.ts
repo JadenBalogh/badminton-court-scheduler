@@ -3,6 +3,7 @@ export type Player = {
   name: string;
   username: string; // Used as an ID for this player. Careful: not checked for uniqueness.
   skillLevel: number;
+  gender: string;
 
   // Dynamic session variables
   isEnabled: boolean; // Whether this player will be considered in the algorithm
@@ -19,6 +20,7 @@ export type Player = {
 export type PlayerData = {
   username: string;
   skillLevel: number;
+  gender: string;
 }
 
 export type Court = {
@@ -39,6 +41,7 @@ export type SessionSettings = {
   diversityScoreWeight: number;
   balanceScoreWeight: number;
   skillScoreWeight: number;
+  genderScoreWeight: number;
 }
 
 export type ConfirmDialogOptions = {

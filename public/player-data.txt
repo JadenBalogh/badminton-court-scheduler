@@ -1,116 +1,115 @@
-Marianne Anderson, 3
-Jaden Balogh, 6
-Julia Bandura, 7
-Jenny Bao, 4
-Chuck Cai, 2
-Richard Chen, 6
-Emily Cheng, 6
-Edward Choi, 4
-Clemence Chu, 7
-ShuYi Chu, 3
-Kevin Ding, 4
-Owen fu, 8
-Michael He, 4
-Francis He, 4
-Jensen Ho, 7
-Bingjie Hou, 3
-Tehchin Hsieh, 5
-Jenny Huang, 5
-Lucia Huang, 3
-Zhena Huang, 5
-Felicia Jiang, 7
-Yazhao Jin, 4
-Wey Leong, 3
-Raymond Leung, 1
-Hao Li, 5
-Sharlene Liao, 7
-Tony Lin, 6
-Linna Lo, 4
-Rajiv Maikhuri, 5
-Vickie Nay, 6
-Ryan O, 7
-David Tang, 5
-Derek Waltho, 4
-Daisy Xiao, 5
-Chensheng Xu, 6
-Yang Yang, 6
-Jack Yiu, 6
-Kelly Zhang, 4
-Yong Zhang, 3
-Robin Zhang, 6
-Jingyi Zhou, 3
-Ray Zhu, 4
-Rebecca Bi, 5
-Maggie Mai, 3
-Leonie Chen, 4
-Wesley Burnawan, 6
-Justin Ko, 6
-Tony Cui, 7
-Carrie Liang, 4
-Jinzhen Dou, 4
-Jase Huang, 6
-Matthew Su, 8
-Lei Huang, 4
-Dexin Chen, 6
-Peter Liu, 8
-Eugenia, 4
-Vongvichra Nay, 5
-Alice Luo, 4
-Jasmine Jin, 4
-Grace Hu, 5
-Cosette Li, 5
-Jingjing Yi, 4
-Jake, 6
-XinYi Wang, 5
-Hang, 5
-Mincong, 3
-Damica, 6
-Kaitlyn Tsoi, 5
-Jingfan Zhang, 7
-Jenny Shih, 3
-Yolanda, 5
-Ryan 1, 8
-Jeremy, 8
-James Chin, 6
-Mon Lam, 6
-Ryan 2, 6
-Rolland He, 6
-Nina Ma, 6
-Giao Trinh, 7
-Eric Ao, 6
-HaoQing, 4
-Kai Hu, 6
-David Li, 5
-Rain Lin, 6
-Yuzuki, 6
-Alex Lee, 6
-Wei Ting Lin, 5
-Michael Oh, 6
-Ann Peng, 4
-Jesse Li, 6
-Julie Sun, 4
-Melissa Ong, 7
-Robin Wei, 7
-Miki Tang, 5
-Yanxiang Chen, 4
-Anh Nguyen, 5
-Beth Athill, 5
-Xi, 6
-Michelle Huang, 4
-Fred Chen, 5
-Alexandra Waxman, 6
-Viktoriia Orel, 6
-Hazel Liu, 3
-Ceci Cao, 5
-Nick Xie, 5
-Jackie Li, 4
-Christina Wang, 5
-Anthony Zou, 6
-Abu Anand, 6
-Juliette Peyronnet, 4
-Henry Chen, 5
-Sam Gu, 6
-Cathy Chen, 3
-Alyanna Chua, 3
-Julia Li, 4
-Cory Yan, 4
+Marianne Anderson, 3, F
+Jaden Balogh, 6, M
+Julia Bandura, 7, F
+Jenny Bao, 4, F
+Chuck Cai, 2, M
+Richard Chen, 6, M
+Emily Cheng, 6, F
+Edward Choi, 4, M
+Clemence Chu, 7, F
+ShuYi Chu, 3, F
+Kevin Ding, 4, M
+Owen fu, 8, M
+Michael He, 4, M
+Francis He, 4, M
+Jensen Ho, 7, M
+Bingjie Hou, 3, F
+Tehchin Hsieh, 5, M
+Jenny Huang, 5, F
+Lucia Huang, 3, F
+Zhena Huang, 5, F
+Felicia Jiang, 7, F
+Yazhao Jin, 4, F
+Wey Leong, 3, M
+Raymond Leung, 1, M
+Hao Li, 5, M
+Sharlene Liao, 7, F
+Tony Lin, 6, M
+Linna Lo, 4, F
+Rajiv Maikhuri, 5, M
+Vickie Nay, 6, F
+Ryan O, 7, M
+David Tang, 5, M
+Derek Waltho, 4, M
+Daisy Xiao, 5, F
+Chensheng Xu, 6, M
+Yang Yang, 6, M
+Jack Yiu, 6, M
+Kelly Zhang, 4, F
+Yong Zhang, 3, M
+Robin Zhang, 6, M
+Jingyi Zhou, 3, F
+Ray Zhu, 4, M
+Rebecca Bi, 5, F
+Maggie Mai, 3, F
+Leonie Chen, 4, F
+Wesley Burnawan, 6, M
+Justin Ko, 6, M
+Tony Cui, 7, M
+Carrie Liang, 4, F
+Jinzhen Dou, 4, F
+Jase Huang, 6, M
+Matthew Su, 8, M
+Lei Huang, 4, F
+Dexin Chen, 6, M
+Peter Liu, 8, M
+Eugenia, 4, F
+Vongvichra Nay, 5, M
+Alice Luo, 4, F
+Jasmine Jin, 4, F
+Grace Hu, 5, F
+Cosette Li, 5, F
+Jingjing Yi, 4, F
+Jake, 6, M
+XinYi Wang, 5, F
+Hang, 5, M
+Mincong, 3, M
+Damica, 6, F
+Kaitlyn Tsoi, 5, F
+Jingfan Zhang, 7, M
+Jenny Shih, 3, F
+Yolanda, 5, F
+Jeremy, 8, M
+James Chin, 6, M
+Mon Lam, 6, M
+Ryan 2, 6, M
+Rolland He, 6, M
+Nina Ma, 6, F
+Giao Trinh, 7, M
+Eric Ao, 6, M
+HaoQing, 4, F
+Kai Hu, 6, M
+David Li, 5, M
+Rain Lin, 6, M
+Yuzuki, 6, F
+Alex Lee, 6, M
+Wei Ting Lin, 5, F
+Michael Oh, 6, M
+Ann Peng, 4, F
+Jesse Li, 6, M
+Julie Sun, 4, F
+Melissa Ong, 7, F
+Robin Wei, 7, M
+Miki Tang, 5, F
+Yanxiang Chen, 4, F
+Anh Nguyen, 5, F
+Beth Athill, 5, F
+Xi, 6, M
+Michelle Huang, 4, F
+Fred Chen, 5, M
+Alexandra Waxman, 6, F
+Viktoriia Orel, 6, F
+Hazel Liu, 3, F
+Ceci Cao, 5, F
+Nick Xie, 5, M
+Jackie Li, 4, F
+Christina Wang, 5, F
+Anthony Zou, 6, M
+Abu Anand, 6, M
+Juliette Peyronnet, 4, F
+Henry Chen, 5, M
+Sam Gu, 6, M
+Cathy Chen, 3, F
+Alyanna Chua, 3, F
+Julia Li, 4, F
+Cory Yan, 4, M

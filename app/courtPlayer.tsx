@@ -1,6 +1,6 @@
 import { Court, Player } from '../types/types';
 
-const SHOW_SKILL_LEVEL = false;
+const SHOW_DATA = false;
 
 type CourtPlayerProps = {
   court: Court;
@@ -15,7 +15,7 @@ export default function CourtPlayer({ court, player, index, handlePlayerSelected
       <div className="text-center max-w-64 w-full"
         onClick={() => handlePlayerSelected(court, player, index)}>
         <p className="text-lg truncate">
-          {player ? player.name + (SHOW_SKILL_LEVEL ? " (" + player.skillLevel + ")" : "") : "[empty]"}
+          {player ? player.name + (SHOW_DATA ? " (" + player.skillLevel + ", " + player.gender + ")" : "") : "[empty]"}
         </p>
       </div>
     </div>

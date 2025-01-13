@@ -25,6 +25,7 @@ const TIME_SCORE_WEIGHT = 4; // How important is wait time?
 const DIVERSITY_SCORE_WEIGHT = 2; // How important is playing with a variety of people?
 const BALANCE_SCORE_WEIGHT = 1; // How important is having balanced teams?
 const SKILL_SCORE_WEIGHT = 1; // How important is playing with other players of the same skill level?
+const GENDER_SCORE_WEIGHT = 2; // How important is having gender-balanced teams?
 
 const DEFAULT_CONFIRM_OPTIONS: ConfirmDialogOptions = {
   title: "",
@@ -56,6 +57,7 @@ export default function Home() {
     diversityScoreWeight: DIVERSITY_SCORE_WEIGHT,
     balanceScoreWeight: BALANCE_SCORE_WEIGHT,
     skillScoreWeight: SKILL_SCORE_WEIGHT,
+    genderScoreWeight: GENDER_SCORE_WEIGHT,
   });
 
   const [playerDatasState, setPlayerDatasState] = useState<PlayerData[]>([]); // Skill level data for all players in database (text file for now)
@@ -136,7 +138,8 @@ export default function Home() {
       let fields = line.split(',');
       let player: PlayerData = {
         username: toUsername(fields[0]),
-        skillLevel: Number(fields[1])
+        skillLevel: Number(fields[1]),
+        gender: fields[2].trim()
       };
 
       playerDatas.push(player);
@@ -239,6 +242,7 @@ export default function Home() {
       name: name,
       username: username,
       skillLevel: playerData ? playerData.skillLevel : 2,
+      gender: playerData ? playerData.gender : 'M',
       isEnabled: false,
       isPlaying: false,
       lastPlayedTimestamp: 0,
