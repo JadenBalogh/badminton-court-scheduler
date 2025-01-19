@@ -13,7 +13,7 @@ Owen fu, 8, M
 Michael He, 4, M
 Francis He, 4, M
 Jensen Ho, 7, M
-Bingjie Hou, 3, F
+Jessica Hou, 3, F
 Tehchin Hsieh, 5, M
 Jenny Huang, 5, F
 Lucia Huang, 3, F
@@ -55,7 +55,7 @@ Dexin Chen, 6, M
 Peter Liu, 8, M
 Eugenia, 4, F
 Vongvichra Nay, 5, M
-Alice Luo, 4, F
+Alice Lou, 4, F
 Jasmine Jin, 4, F
 Grace Hu, 5, F
 Cosette Li, 5, F
@@ -113,3 +113,6 @@ Cathy Chen, 3, F
 Alyanna Chua, 3, F
 Julia Li, 4, F
 Cory Yan, 4, M
+Angel Chan, 3, F
+William Tang, 5, M
+Grace Yin, 4, F
