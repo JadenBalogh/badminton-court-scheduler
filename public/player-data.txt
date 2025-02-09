@@ -116,3 +116,6 @@ Cory Yan, 4, M
 Angel Chan, 3, F
 William Tang, 5, M
 Grace Yin, 4, F
+Grace Wang, 4, F
+Selina Liu, 4, F
+Loria Lin, 4, F
