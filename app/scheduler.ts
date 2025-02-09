@@ -12,7 +12,9 @@ const DEFAULT_PLAYER: Player = {
   lastPartneredTimestamp: {},
   gamesPlayed: 0,
   timesPartnered: {},
-  lastScheduledEndTimestamp: 0
+  lastScheduledEndTimestamp: 0,
+  lastScheduledPartneredTimestamp: {},
+  scheduledTimesPartnered: {}
 }
 
 function getScoresDebugString(players: Player[], gameStartTime: number, selectedPlayers: Player[], settings: SessionSettings) {
@@ -41,11 +43,11 @@ function calculateTimeScore(player: Player, gameStartTime: number, settings: Ses
 function calculateDiversityScore(player: Player, gameStartTime: number, otherPlayers: Player[], settings: SessionSettings) {
   let diversityScore = 0;
   for (let otherPlayer of otherPlayers) {
-    let lastPartneredTime = player.lastPartneredTimestamp[otherPlayer.username] || 0;
+    let lastPartneredTime = player.lastScheduledPartneredTimestamp[otherPlayer.username] || 0;
     let lastPlayedDelay = gameStartTime - lastPartneredTime;
     let diversityDelayScore = Math.min(lastPlayedDelay, settings.maxDiversityScoreWaitTime) / settings.maxDiversityScoreWaitTime;
 
-    let timesPartnered = player.timesPartnered[otherPlayer.username] || 0;
+    let timesPartnered = player.scheduledTimesPartnered[otherPlayer.username] || 0;
     let diversityCountScore = 1 - (Math.min(timesPartnered, settings.maxDiversityScorePlayCount) / settings.maxDiversityScorePlayCount);
 
     diversityScore += diversityDelayScore * 0.5 + diversityCountScore * 0.5;
@@ -229,7 +231,18 @@ function assignCourtPlayers(playerQueue: Player[], players: Player[], gameStartT
     console.log(structuredClone(team2Player2));
   }
 
-  return [team1Player1.username, team1Player2.username, team2Player1.username, team2Player2.username];
+  let assignedPlayerIDs = [team1Player1.username, team1Player2.username, team2Player1.username, team2Player2.username];
+
+  // Update scheduled partnerings for this assigned court
+  for (let playerID of assignedPlayerIDs) {
+    let activePlayer = getActivePlayer(playerID, players);
+    for (let otherPlayerID of assignedPlayerIDs.filter(otherID => otherID !== playerID)) {
+      activePlayer.lastScheduledPartneredTimestamp[otherPlayerID] = activePlayer.lastScheduledEndTimestamp;
+      activePlayer.scheduledTimesPartnered[otherPlayerID] = activePlayer.scheduledTimesPartnered[otherPlayerID] + 1 || 1;
+    }
+  }
+
+  return assignedPlayerIDs;
 }
 
 function getActivePlayer(username: string, players: Player[]): Player {
@@ -295,6 +308,7 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
 
   let debugStartTime = getCurrentTime();
   let scheduledGameTime = getCurrentTime();
+
   playerQueue.forEach(player => {
     let scheduledEnd = player.lastPlayedTimestamp;
     if (player.isPlaying) {
@@ -303,6 +317,25 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
       scheduledEnd = scheduledGameTime;
     }
     getActivePlayer(player.username, players).lastScheduledEndTimestamp = scheduledEnd;
+  });
+
+  playerQueue.forEach(player => {
+    let activePlayer = getActivePlayer(player.username, players);
+    let lastScheduledParteneredTimestamp = { ...activePlayer.lastPartneredTimestamp };
+    let scheduledTimesPartnered = { ...activePlayer.timesPartnered };
+
+    if (activePlayer.isPlaying) {
+      let playerCourt = courts.find((court) => court.playerIDs.includes(activePlayer.username));
+      if (playerCourt) {
+        for (let otherPlayerID of playerCourt.playerIDs.filter(otherID => otherID != activePlayer.username)) {
+          lastScheduledParteneredTimestamp[otherPlayerID] = activePlayer.lastScheduledEndTimestamp;
+          scheduledTimesPartnered[otherPlayerID] = scheduledTimesPartnered[otherPlayerID] + 1 || 1;
+        }
+      }
+    }
+
+    activePlayer.lastScheduledPartneredTimestamp = lastScheduledParteneredTimestamp;
+    activePlayer.scheduledTimesPartnered = scheduledTimesPartnered;
   });
 
   if (ADVANCED_DEBUG_LOGGING) {

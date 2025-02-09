@@ -251,7 +251,9 @@ export default function Home() {
       lastPartneredTimestamp: {},
       gamesPlayed: 0,
       timesPartnered: {},
-      lastScheduledEndTimestamp: 0
+      lastScheduledEndTimestamp: 0,
+      lastScheduledPartneredTimestamp: {},
+      scheduledTimesPartnered: {}
     };
 
     activePlayers.push(player);
@@ -312,6 +314,8 @@ export default function Home() {
       player.gamesPlayed = 0;
       player.timesPartnered = {};
       player.lastScheduledEndTimestamp = 0;
+      player.lastScheduledPartneredTimestamp = {};
+      player.scheduledTimesPartnered = {};
     }
   }
 

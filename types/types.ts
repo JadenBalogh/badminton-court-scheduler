@@ -15,6 +15,8 @@ export type Player = {
 
   // Transient algorithm variables
   lastScheduledEndTimestamp: number; // The hypothetical last played time in the queue, based on last scheduled time
+  lastScheduledPartneredTimestamp: { [username: string]: number }; // The hypothetical timestamp this player last finished playing with each other player in the queue
+  scheduledTimesPartnered: { [username: string]: number };
 }
 
 export type PlayerData = {

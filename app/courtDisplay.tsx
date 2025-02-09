@@ -14,7 +14,9 @@ const DEFAULT_PLAYER: Player = {
   lastPartneredTimestamp: {},
   gamesPlayed: 0,
   timesPartnered: {},
-  lastScheduledEndTimestamp: 0
+  lastScheduledEndTimestamp: 0,
+  lastScheduledPartneredTimestamp: {},
+  scheduledTimesPartnered: {}
 }
 
 type CourtProps = {
