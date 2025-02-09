@@ -10,6 +10,8 @@ import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 
 const SHOW_DEBUG_OPTIONS = false;
 
+const REGISTERED_PLAYERS_FILE = './registered-players-feb9.txt';
+
 const COURT_COUNT = 3;
 const QUEUE_LENGTH = 6;
 const MAX_TEAM_SKILL_VARIANCE = 2;
@@ -153,7 +155,7 @@ export default function Home() {
       return; // Players are already loaded, don't overwrite
     }
 
-    let data = await fetch('./registered-players-feb9.txt');
+    let data = await fetch(REGISTERED_PLAYERS_FILE);
     let text = await data.text();
 
     activePlayers = [];
