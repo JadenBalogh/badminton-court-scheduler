@@ -536,6 +536,12 @@ export default function Home() {
     console.log(activeCourts);
     console.log("Court Queue:");
     console.log(courtQueue);
+    console.log("Constants:");
+    console.log("Time: " + TIME_SCORE_WEIGHT);
+    console.log("Diversity: " + DIVERSITY_SCORE_WEIGHT);
+    console.log("Balance: " + BALANCE_SCORE_WEIGHT);
+    console.log("Skill: " + SKILL_SCORE_WEIGHT);
+    console.log("Gender: " + GENDER_SCORE_WEIGHT);
   }
 
   // Test algorithm:
@@ -572,12 +578,14 @@ export default function Home() {
 
     console.log("Simulated Games:");
     console.log({ debugGamesPlayed });
+    printAllPlayerStats();
+    resetSession();
+  }
 
+  function printAllPlayerStats() {
     for (let activePlayer of activePlayers) {
       printPlayerStats(activePlayer);
     }
-
-    resetSession();
   }
 
   function printPlayerStats(player: Player) {
@@ -729,6 +737,10 @@ export default function Home() {
 
           <button onClick={printState}>
             Print the current state
+          </button>
+
+          <button onClick={printAllPlayerStats}>
+            Print player stats
           </button>
         </div> : <></>}
       </div>
