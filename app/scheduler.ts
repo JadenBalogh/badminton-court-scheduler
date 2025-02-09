@@ -26,7 +26,7 @@ function getScoresDebugString(players: Player[], gameStartTime: number, selected
     scoresArray.push("SKILL: " + calculateSkillScore(player, selectedPlayers, settings) * settings.skillScoreWeight);
     scoresArray.push("GENDER: " + calculateGenderScore(player, selectedPlayers, settings) * settings.genderScoreWeight);
     scoresArray.push("Wait Time: " + ((gameStartTime - player.lastScheduledEndTimestamp) / 60000) + " mins");
-    return [player.name, calculateTotalScore(player, gameStartTime, selectedPlayers, settings), scoresArray, player];
+    return [player.name, calculateTotalScore(player, gameStartTime, selectedPlayers, settings), scoresArray, structuredClone(player)];
   }).sort((a, b) => Number(b[1]) - Number(a[1]));
 }
 
@@ -287,12 +287,15 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
   }
 
   // Step 2: Calculate estimated start times based on the current active court estimated times remaining
+  let currentTime = getCurrentTime();
+  let scheduledStartTime = currentTime;
+
   let courtQueue: Court[] = [...courts];
   courtQueue.sort((a, b) => {
     return a.startTime - b.startTime;
   });
-  let startOffsets = courtQueue.map(court => {
-    let playedDuration = getCurrentTime() - court.startTime;
+  let courtStartOffsets = courtQueue.map(court => {
+    let playedDuration = currentTime - court.startTime;
     return settings.expectedGameDuration - playedDuration;
   });
 
@@ -303,20 +306,21 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
 
   if (ADVANCED_DEBUG_LOGGING) {
     console.log("Computed estimated times remaining per active court:");
-    console.log(structuredClone(startOffsets));
+    console.log(structuredClone(courtStartOffsets));
   }
 
-  let debugStartTime = getCurrentTime();
-  let scheduledGameTime = getCurrentTime();
-
   playerQueue.forEach(player => {
-    let scheduledEnd = player.lastPlayedTimestamp;
-    if (player.isPlaying) {
-      // let playerCourt = courts.find((court) => court.playerIDs.includes(player.username));
-      // scheduledEnd = playerCourt ? playerCourt.startTime + settings.expectedGameDuration : scheduledEnd;
-      scheduledEnd = scheduledGameTime;
+    let activePlayer = getActivePlayer(player.username, players);
+    let lastScheduledEndTimestamp = activePlayer.lastPlayedTimestamp;
+
+    if (activePlayer.isPlaying) {
+      let playerCourt = courts.find((court) => court.playerIDs.includes(activePlayer.username));
+      if (playerCourt) {
+        lastScheduledEndTimestamp = playerCourt.startTime + settings.expectedGameDuration;
+      }
     }
-    getActivePlayer(player.username, players).lastScheduledEndTimestamp = scheduledEnd;
+
+    activePlayer.lastScheduledEndTimestamp = lastScheduledEndTimestamp;
   });
 
   playerQueue.forEach(player => {
@@ -348,23 +352,23 @@ function generateQueue(players: Player[], courts: Court[], queueLength: number, 
     let courtIndex = i % settings.courtCount;
 
     if (i > 0 && courtIndex === 0) {
-      scheduledGameTime += settings.expectedGameDuration;
+      scheduledStartTime += settings.expectedGameDuration;
     }
 
     let court: Court = {
       id: i,
       playerIDs: [],
-      startTime: scheduledGameTime + startOffsets[courtIndex]
+      startTime: scheduledStartTime + courtStartOffsets[courtIndex]
     };
 
     if (ADVANCED_DEBUG_LOGGING) {
       console.log("*****");
       console.log("*****");
       console.log("*****");
-      console.log("Scheduling Court " + i + " at time " + scheduledGameTime + " (" + ((scheduledGameTime - debugStartTime) / 60000) + " minutes later)");
+      console.log("Scheduling Court " + i + " at time " + court.startTime + " (" + ((court.startTime - currentTime) / 60000) + " minutes later)");
     }
 
-    court.playerIDs = assignCourtPlayers(playerQueue, players, scheduledGameTime, settings);
+    court.playerIDs = assignCourtPlayers(playerQueue, players, court.startTime, settings);
     result.push(court);
   }
 
