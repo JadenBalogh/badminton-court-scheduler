@@ -119,4 +119,4 @@ Grace Yin, 4, F
 Grace Wang, 4, F
 Selina Liu, 4, F
 Loria Lin, 4, F
-Alexia Zou, 4, F
+Alexia Zou, 3, F
