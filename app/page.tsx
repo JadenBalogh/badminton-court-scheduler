@@ -10,7 +10,7 @@ import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 
 const SHOW_DEBUG_OPTIONS = false;
 
-const REGISTERED_PLAYERS_FILE = './registered-players-mar1.txt';
+const REGISTERED_PLAYERS_FILE = './registered-players-mar9.txt';
 
 const COURT_COUNT = 3;
 const QUEUE_LENGTH = 6;
