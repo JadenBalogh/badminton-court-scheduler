@@ -120,3 +120,5 @@ Grace Wang, 4, F
 Selina Liu, 4, F
 Loria Lin, 4, F
 Alexia Zou, 3, F
+Christina, 5, F
+Evan Fang, 5, M
